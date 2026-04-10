@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <button class="hamburger d-none d-md-block" id="hamburger">
+      <i class="bi bi-list"></i>
+    </button>
+
+    <div class="dashboard">
+      <!-- Sidebar -->
+      <nav class="sidebar" id="sidebar">
+        <div class="p-4 border-bottom border-white border-opacity-25">
+          <h4 class="text-white mb-0">StudyFlow</h4>
+        </div>
+        <a href="#" class="sidebar-item active">
+          <i class="bi bi-house-door"></i> Dashboard
+        </a>
+        <a href="#" class="sidebar-item">
+          <i class="bi bi-check2-square"></i> Tasks
+        </a>
+        <a href="profile.html" class="sidebar-item">
+          <i class="bi bi-person"></i> Profile
+        </a>
+        <a href="index.html" class="sidebar-item">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+      </nav>
+
+      <!-- Content -->
+      <div class="content">
+        <!-- Header -->
+        <div
+          class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3"
+        >
+          <h1 class="h3 fw-bold text-dark mb-0">Dashboard</h1>
+          <div class="d-flex gap-2">
+            <a
+              href="profile.html"
+              class="btn btn-primary rounded-pill px-4 py-2 d-flex align-items-center gap-2 shadow-sm"
+            >
+              <i class="bi bi-person-circle"></i>
+              Profile
+            </a>
+            <a
+              href="index.html"
+              class="btn btn-outline-danger rounded-pill px-4 py-2 shadow-sm"
+            >
+              Logout
+            </a>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row g-4 mb-5">
+          <div class="col-lg-3 col-md-6 col-12">
+            <div
+              class="card stat-card text-center text-white p-4 h-100"
+              style="background: rgb(187, 255, 255)"
+            >
+              <i class="bi bi-clipboard-data fs-1 mb-3 opacity-75"></i>
+              <h3 class="mb-1">47</h3>
+              <p class="mb-0 small">Total Tasks</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-12">
+            <div
+              class="card stat-card text-center text-white p-4 h-100"
+              style="background: rgb(184, 184, 255)"
+            >
+              <i class="bi bi-check-circle-fill fs-1 mb-3 opacity-75"></i>
+              <h3 class="mb-1">32</h3>
+              <p class="mb-0 small">Completed</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-12">
+            <div
+              class="card stat-card text-center text-white p-4 h-100"
+              style="background: rgb(255, 255, 170)"
+            >
+              <i class="bi bi-clock-history fs-1 mb-3 opacity-75"></i>
+              <h3 class="mb-1">8</h3>
+              <p class="mb-0 small">In Progress</p>
+            </div>
+          </div>
+          <div class="col-lg-3 col-md-6 col-12">
+            <div
+              class="card stat-card text-center text-white p-4 h-100"
+              style="background: rgba(232, 115, 115, 0.625)"
+            >
+              <i
+                class="bi bi-exclamation-triangle-fill fs-1 mb-3 opacity-75"
+              ></i>
+              <h3 class="mb-1">3</h3>
+              <p class="mb-0 small">Overdue</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div
+              class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2"
+            >
+              <h2 class="h4 fw-bold mb-0">All Tasks</h2>
+              <div class="d-flex gap-2">
+                <select
+                  class="form-select form-select-sm rounded-pill px-3"
+                  style="width: 120px"
+                >
+                  <option>All Status</option>
+                </select>
+                <select
+                  class="form-select form-select-sm rounded-pill px-3"
+                  style="width: 120px"
+                >
+                  <option>All Subjects</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="card task-card p-4">
+              <div
+                class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2"
+              >
+                <h5 class="fw-bold mb-0">Math Homework #5</h5>
+                <div class="d-flex gap-2">
+                  <button
+                    class="btn btn-outline-primary btn-sm rounded-circle p-2"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger btn-sm rounded-circle p-2"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-3 mb-3 small text-muted">
+                <span><i class="bi bi-journal-text me-1"></i>Mathematics</span>
+                <span><i class="bi bi-calendar3 me-1"></i>Dec 15</span>
+                <span class="text-warning"
+                  ><i class="bi bi-star-fill me-1"></i>Hard</span
+                >
+              </div>
+              <span class="status-badge bg-danger text-white">Overdue</span>
+            </div>
+
+            <div class="card task-card p-4">
+              <div
+                class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2"
+              >
+                <h5 class="fw-bold mb-0">Biology Report</h5>
+                <div class="d-flex gap-2">
+                  <button
+                    class="btn btn-outline-primary btn-sm rounded-circle p-2"
+                  >
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button
+                    class="btn btn-outline-danger btn-sm rounded-circle p-2"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="d-flex flex-wrap gap-3 mb-3 small text-muted">
+                <span><i class="bi bi-journal-text me-1"></i>Biology</span>
+                <span><i class="bi bi-calendar3 me-1"></i>Tomorrow</span>
+                <span class="text-warning"
+                  ><i class="bi bi-star-fill me-1"></i
+                  ><i class="bi bi-star-fill"></i>Medium</span
+                >
+              </div>
+              <span class="status-badge bg-warning text-dark">Tomorrow</span>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="right-panel p-4 sticky-top" style="top: 2rem">
+              <h5 class="fw-bold mb-4">Upcoming Deadlines</h5>
+              <div class="p-3 bg-light rounded-3 mb-3">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="mb-1">Physics Quiz</h6>
+                    <small class="text-muted">Today 3PM</small>
+                  </div>
+                  <span class="badge bg-danger rounded-pill px-3 py-1"
+                    >Today</span
+                  >
+                </div>
+              </div>
+              <div class="p-3 bg-light rounded-3">
+                <div class="d-flex justify-content-between">
+                  <div>
+                    <h6 class="mb-1">English Essay</h6>
+                    <small class="text-muted">Dec 18</small>
+                  </div>
+                  <span class="badge bg-primary rounded-pill px-3 py-1"
+                    >Soon</span
+                  >
+                </div>
+              </div>
+
+              <h6 class="fw-bold mt-4 mb-3">By Category</h6>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  Math <span>78%</span>
+                </div>
+                <div class="progress" style="height: 8px">
+                  <div class="progress-bar bg-primary" style="width: 78%"></div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <div class="d-flex justify-content-between small mb-1">
+                  Science <span>65%</span>
+                </div>
+                <div class="progress" style="height: 8px">
+                  <div class="progress-bar bg-success" style="width: 65%"></div>
+                </div>
+              </div>
+              <div>
+                <div class="d-flex justify-content-between small mb-1">
+                  English <span>92%</span>
+                </div>
+                <div class="progress" style="height: 8px">
+                  <div class="progress-bar bg-info" style="width: 92%"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Only sidebar toggle - minimal JS
+      const sidebar = document.getElementById("sidebar");
+      const hamburger = document.getElementById("hamburger");
+
+      const content = document.querySelector(".content");
+
+      hamburger.addEventListener("click", () => {
+        sidebar.classList.toggle("show");
+        sidebar.classList.toggle("hidden");
+
+        content.classList.toggle("full"); // THIS FIXES YOUR PROBLEM
+      });
+
+      // Close sidebar on outside click (mobile only)
+      document.addEventListener("click", (e) => {
+        if (
+          window.innerWidth <= 992 &&
+          sidebar.classList.contains("show") &&
+          !sidebar.contains(e.target) &&
+          !hamburger.contains(e.target)
+        ) {
+          sidebar.classList.remove("show");
+          sidebar.classList.add("hidden");
+        }
+      });
+    </script>
+  </body>
+</html>
