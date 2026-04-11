@@ -19,9 +19,9 @@ This system helps students organize their academic tasks in one platform. It wou
 
 | Member | Role |
 |---|---|
-| Mico Malana | Project Manager |
+| Mico Malana | Project Manager, Documentation Officer |
 | Christian Sannie Silo | Front-End Developer |
-| Jay Lloyd Chicogo | Backend Developer, GitHub Manager, & Documentation Officer |
+| Jay Lloyd Chicogo | Backend Developer, GitHub Manager |
 | John Nelson Andes | Database Manager |
 | Allen Benedict Asuncion | Tester & Debugger |
 
