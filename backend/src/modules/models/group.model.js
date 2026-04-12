@@ -10,6 +10,10 @@ const groupSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
     },
+    inviteCode: {
+      type: String,
+      unique: true,
+    },
   },
   { timestamps: true },
 );
