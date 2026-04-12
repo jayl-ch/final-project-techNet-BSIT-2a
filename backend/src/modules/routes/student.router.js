@@ -12,10 +12,6 @@ const {
   getAllStudents,
 } = require("../controllers/student.controller");
 
-studentRouter.get("/student", (req, res) => {
-  res.send({ message: "Welcome to student" });
-});
-
 // REGISTER
 studentRouter.post("/student/register", async (req, res) => {
   try {
