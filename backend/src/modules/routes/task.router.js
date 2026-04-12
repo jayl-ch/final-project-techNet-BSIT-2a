@@ -8,14 +8,13 @@ const {
 
 const taskRouter = express.Router();
 
-const authMiddleware = require("../middlewares/task.middleware");
+const authMiddleware = require("../middlewares/auth.middleware");
 
 // GET ALL THE TASKS
-taskRouter.get("/tasks", authMiddleware, async (req, res) => {
+taskRouter.get("/task", authMiddleware, async (req, res) => {
   const { id } = req.student;
   try {
     const tasks = await getTasks(id);
-    if (!tasks) return res.json({ message: "Tasks is empty." });
 
     res.status(200).json({ tasks });
   } catch (error) {
@@ -24,11 +23,12 @@ taskRouter.get("/tasks", authMiddleware, async (req, res) => {
 });
 
 // CREATE TASK
-taskRouter.post("/task/create", async (req, res) => {
+taskRouter.post("/task/create", authMiddleware, async (req, res) => {
   const task = req.body;
+  const { id } = req.student;
 
   try {
-    const newTask = await createTask(task);
+    const newTask = await createTask(task, id);
     res.status(201).json({ newTask });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -36,12 +36,22 @@ taskRouter.post("/task/create", async (req, res) => {
 });
 
 // UPDATE TASK
-taskRouter.put("/task/update/:id", async (req, res) => {
-  const task = req.body;
+taskRouter.patch("/task/update/:id", async (req, res) => {
   try {
+    const allowedFields = ["name", "difficulty", "deadline"];
+    const task = {};
+
+    for (let key of allowedFields) {
+      if (req.body[key] !== undefined) {
+        task[key] = req.body[key];
+      }
+    }
+
     const newTask = await updateTask(req.params.id, task);
-    if (!newTask)
-      res.status(404).json({ message: "Task not found or unauthorized" });
+
+    if (!newTask) {
+      return res.status(404).json({ message: "Task not found" });
+    }
 
     res.status(200).json({ newTask });
   } catch (error) {
