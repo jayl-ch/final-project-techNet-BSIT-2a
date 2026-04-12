@@ -5,15 +5,22 @@ const getTasks = async (id) => {
   return await Task.find({ creator: new mongoose.Types.ObjectId(id) });
 };
 
-const createTask = async (task) => {
-  return await Task.create(task);
+const createTask = async (task, id) => {
+  return await Task.create({
+    ...task,
+    creator: new mongoose.Types.ObjectId(id),
+  });
 };
 
-const updateTask = async (task, taskId) => {
-  return await Task.findOneAndUpdate(taskId, task, {
-    new: true,
-    runValidators: true,
-  });
+const updateTask = async (taskId, task) => {
+  return await Task.findByIdAndUpdate(
+    taskId,
+    { $set: task },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
 };
 
 module.exports = { getTasks, createTask, updateTask };
