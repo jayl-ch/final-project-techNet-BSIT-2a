@@ -4,6 +4,7 @@ const {
   createGroup,
   joinGroup,
   getGroups,
+  deleteGroup,
 } = require("../controllers/group.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 
@@ -40,6 +41,18 @@ groupRouter.post("/group/join", authMiddleware, async (req, res) => {
   try {
     const member = await joinGroup(code, id);
     res.status(200).json({ member });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
+groupRouter.delete("/group/delete/:id", authMiddleware, async (req, res) => {
+  const { id } = req.student;
+
+  try {
+    const deletedGroup = await deleteGroup(req.params.id, id);
+
+    res.status(200).json({ deletedGroup });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }

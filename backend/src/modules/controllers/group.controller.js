@@ -31,4 +31,17 @@ const getGroups = async (id) => {
   return await Group.find({ owner: new mongoose.Types.ObjectId(id) });
 };
 
-module.exports = { createGroup, joinGroup, getGroups };
+const deleteGroup = async (id, studentId) => {
+  const group = await Group.findOne({
+    _id: new mongoose.Types.ObjectId(id),
+    owner: new mongoose.Types.ObjectId(studentId),
+  });
+
+  if (!group) throw new Error("Group not found");
+
+  await Group.findByIdAndDelete(id);
+
+  return group;
+};
+
+module.exports = { createGroup, joinGroup, getGroups, deleteGroup };

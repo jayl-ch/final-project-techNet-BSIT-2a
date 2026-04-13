@@ -23,4 +23,17 @@ const updateTask = async (taskId, task) => {
   );
 };
 
-module.exports = { getTasks, createTask, updateTask };
+const deleteTask = async (taskId, studentId) => {
+  const task = await Task.findOne({
+    _id: new mongoose.Types.ObjectId(taskId),
+    creator: new mongoose.Types.ObjectId(studentId),
+  });
+
+  if (!task) throw new Error("Task not found");
+
+  await Task.findByIdAndDelete(taskId);
+
+  return task;
+};
+
+module.exports = { getTasks, createTask, updateTask, deleteTask };
