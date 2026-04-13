@@ -4,6 +4,7 @@ const {
   getTasks,
   createTask,
   updateTask,
+  deleteTask,
 } = require("../controllers/task.controller");
 
 const taskRouter = express.Router();
@@ -56,6 +57,18 @@ taskRouter.patch("/task/update/:id", async (req, res) => {
     res.status(200).json({ newTask });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+});
+
+taskRouter.delete("/task/delete/:id", authMiddleware, async (req, res) => {
+  const { id } = req.student;
+
+  try {
+    const deletedTask = await deleteTask(req.params.id, id);
+
+    res.status(200).json({ deletedTask });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
   }
 });
 
