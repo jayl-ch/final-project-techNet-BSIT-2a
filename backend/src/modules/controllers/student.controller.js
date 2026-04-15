@@ -1,25 +1,25 @@
-const Student = require("../models/student.model");
+const studentService = require("../services/student.service");
 
-const createStudent = async (student) => {
-  return await Student.create(student);
+const createStudent = async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const student = await studentService.createStudent(password, 10, {
+      name,
+      email,
+    });
+    res.status(201).json({ student });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-const findStudent = async (email) => {
-  return await Student.findOne({ email });
+const findStudent = async (req, res) => {
+  try {
+    const token = await studentService.loginStudent(req.body);
+    res.status(200).json({ token });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
 };
 
-const findStudentById = async (id) => {
-  return await Student.findById(id);
-};
-
-// TESTING PURPOSES
-const getAllStudents = async () => {
-  return await Student.find();
-};
-
-module.exports = {
-  createStudent,
-  findStudent,
-  findStudentById,
-  getAllStudents,
-};
+module.exports = { createStudent, findStudent };
