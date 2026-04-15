@@ -10,7 +10,8 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 - **Framework:** Express.js
 - **Database:** MongoDB (Mongoose ODM)
 - **Authentication:** JWT, bcrypt
-- **Utilities:** dotenv, cors
+- **Security Middlware:** helmet,cors
+- **Environment Management:** dotenv
 - **Dev Tools:** nodemon
 
 ---
@@ -26,6 +27,7 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 │   │   └── /controllers
 │   │   │   └── group.controller.js
 │   │   │   └── student.controller.js
+│   │   │   └── task.assignment.controller.js
 │   │   │   └── task.controller.js
 │   │   └── /middlewares
 │   │   │   └── auth.middleware.js
@@ -36,10 +38,21 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 │   │   │   └── task.assigment.model.js
 │   │   │   └── task.model.js
 │   │   │   └── task.priority.model.js
+│   │   └── /repositories
+│   │   │   └── group.member.repo.js
+│   │   │   └── group.repo.js
+│   │   │   └── student.repo.js
+│   │   │   └── task.assignment.repo.js
+│   │   │   └── task.repo.js
 │   │   └── /routes
-│   │       └── group.router.js
-│   │       └── student.router.js
-│   │       └── task.router.js
+│   │   │   └── group.router.js
+│   │   │   └── student.router.js
+│   │   │   └── task.router.js
+│   │   └── /services
+│   │       └── group.service.js
+│   │       └── student.service.js
+│   │       └── task.assignment.service.js
+│   │       └── task.service.js
 │   └── server.js
 ├── .env
 ├── package.json
@@ -57,10 +70,6 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 | Task           | Core task entity                   |
 | TaskAssignment | Assigns tasks to students          |
 | TaskPriority   | Stores task priority levels        |
-
----
-
-## 🔐 Environment Variables
 
 ---
 
@@ -112,7 +121,7 @@ npm start
 | ------ | ---------------------- | ------------- |
 | GET    | `/api/task`            | Get all tasks |
 | POST   | `/api/task/create`     | Create a task |
-| PATCH  | `/api/task/:id`        | Update a task |
+| PATCH  | `/api/task/update/:id` | Update a task |
 | DELETE | `/api/task/delete/:id` | Delete a task |
 
 ---
