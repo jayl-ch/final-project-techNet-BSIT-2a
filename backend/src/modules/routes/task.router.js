@@ -7,69 +7,24 @@ const {
   deleteTask,
 } = require("../controllers/task.controller");
 
+const assignTask = require("../controllers/task.assignment.controller");
 const taskRouter = express.Router();
 
 const authMiddleware = require("../middlewares/auth.middleware");
 
 // GET ALL THE TASKS
-taskRouter.get("/task", authMiddleware, async (req, res) => {
-  const { id } = req.student;
-  try {
-    const tasks = await getTasks(id);
-
-    res.status(200).json({ tasks });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+taskRouter.get("/task", authMiddleware, getTasks);
 
 // CREATE TASK
-taskRouter.post("/task/create", authMiddleware, async (req, res) => {
-  const task = req.body;
-  const { id } = req.student;
-
-  try {
-    const newTask = await createTask(task, id);
-    res.status(201).json({ newTask });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
+taskRouter.post("/task/create", authMiddleware, createTask);
 
 // UPDATE TASK
-taskRouter.patch("/task/update/:id", async (req, res) => {
-  try {
-    const allowedFields = ["name", "difficulty", "deadline"];
-    const task = {};
+taskRouter.patch("/task/update/:id", authMiddleware, updateTask);
 
-    for (let key of allowedFields) {
-      if (req.body[key] !== undefined) {
-        task[key] = req.body[key];
-      }
-    }
+// TASK ASSIGNMENT
+taskRouter.post("/task/assign", authMiddleware, assignTask);
 
-    const newTask = await updateTask(req.params.id, task);
-
-    if (!newTask) {
-      return res.status(404).json({ message: "Task not found" });
-    }
-
-    res.status(200).json({ newTask });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-});
-
-taskRouter.delete("/task/delete/:id", authMiddleware, async (req, res) => {
-  const { id } = req.student;
-
-  try {
-    const deletedTask = await deleteTask(req.params.id, id);
-
-    res.status(200).json({ deletedTask });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-});
+// DELETE TASK
+taskRouter.delete("/task/delete/:id", authMiddleware, deleteTask);
 
 module.exports = taskRouter;
