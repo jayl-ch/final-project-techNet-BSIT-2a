@@ -2,7 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 
-const { create } = require("../repositories/student.repo");
+const { create, findByEmail } = require("../repositories/student.repo");
 
 const createStudent = async (salt, studentInfo) => {
   const { name, email, password } = studentInfo;

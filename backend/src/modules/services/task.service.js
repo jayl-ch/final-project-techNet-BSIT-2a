@@ -1,6 +1,9 @@
 const {
+  create,
   findByCreator,
   findByIdAndCreator,
+  updateById,
+  deleteById,
 } = require("../repositories/task.repo");
 
 const getTasksByCreator = async (id) => {
@@ -35,10 +38,10 @@ const updateTask = async (taskId, studentId, taskInfo) => {
 };
 
 const deleteTask = async (taskId, studentId) => {
-  const task = findByIdAndCreator(taskId, studentId);
+  const task = await findByIdAndCreator(taskId, studentId);
   if (!task) throw new Error("Unauthorized");
 
-  await deleteById(req.params.id);
+  await deleteById(taskId);
   return task;
 };
 
