@@ -7,8 +7,8 @@ const taskPrioritySchema = new mongoose.Schema(
       ref: "Task",
     },
     priorityLevel: {
-      type: Number,
-      enum: [1, 2, 3],
+      type: String,
+      maxlength: 10,
     },
   },
   { timestamps: true },
