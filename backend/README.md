@@ -29,6 +29,7 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 │   │   │   └── student.controller.js
 │   │   │   └── task.assignment.controller.js
 │   │   │   └── task.controller.js
+│   │   │   └── task.priority.controller.js
 │   │   └── /middlewares
 │   │   │   └── auth.middleware.js
 │   │   └── /models
@@ -43,6 +44,7 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 │   │   │   └── group.repo.js
 │   │   │   └── student.repo.js
 │   │   │   └── task.assignment.repo.js
+│   │   │   └── task.priority.repo.js
 │   │   │   └── task.repo.js
 │   │   └── /routes
 │   │   │   └── group.router.js
@@ -52,6 +54,7 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 │   │       └── group.service.js
 │   │       └── student.service.js
 │   │       └── task.assignment.service.js
+│   │       └── task.priority.service.js
 │   │       └── task.service.js
 │   └── server.js
 ├── .env
@@ -117,12 +120,14 @@ npm start
 
 ### Task `/api/task`
 
-| Method | Endpoint               | Description   |
-| ------ | ---------------------- | ------------- |
-| GET    | `/api/task`            | Get all tasks |
-| POST   | `/api/task/create`     | Create a task |
-| PATCH  | `/api/task/update/:id` | Update a task |
-| DELETE | `/api/task/delete/:id` | Delete a task |
+| Method | Endpoint                 | Description            |
+| ------ | ------------------------ | ---------------------- |
+| GET    | `/api/task`              | Get all tasks          |
+| POST   | `/api/task/create`       | Create a task          |
+| PATCH  | `/api/task/update/:id`   | Update a task          |
+| POST   | `/api/task/assign`       | Assign a task          |
+| POST   | `/api/task/priority/:id` | Set the priority level |
+| DELETE | `/api/task/delete/:id`   | Delete a task          |
 
 ---
 
