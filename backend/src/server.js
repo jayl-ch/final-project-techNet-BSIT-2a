@@ -1,6 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
+const helmet = require("helmet");
 
 const connectDB = require("./config/db");
 
@@ -13,6 +14,7 @@ const app = express();
 const routers = [studentRouter, groupRouter, taskRouter];
 
 app.use(express.json());
+app.use(helmet());
 app.use(cors());
 
 routers.forEach((router) => {
