@@ -1,12 +1,18 @@
 const studentService = require("../services/student.service");
 
-const createStudent = async (req, res) => {
-  const { name, email, password } = req.body;
+const getAuthStudent = async (req, res) => {
+  const { id } = req.student;
   try {
-    const student = await studentService.createStudent(password, 10, {
-      name,
-      email,
-    });
+    const student = await studentService.getAuthStudent(id);
+    res.status(200).json({ student });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const createStudent = async (req, res) => {
+  try {
+    const student = await studentService.createStudent(10, req.body);
     res.status(201).json({ student });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -22,4 +28,4 @@ const findStudent = async (req, res) => {
   }
 };
 
-module.exports = { createStudent, findStudent };
+module.exports = { getAuthStudent, createStudent, findStudent };
