@@ -23,7 +23,7 @@ routers.forEach((router) => {
 
 async function start() {
   const port = process.env.PORT;
-  const uri = process.env.MONGO_URI_LOCAL;
+  const uri = process.env.MONGO_URI;
 
   await connectDB(uri);
 
