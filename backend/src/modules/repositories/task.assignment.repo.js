@@ -8,4 +8,19 @@ const createTaskAssignment = async (taskId, assignedTo, groupId) => {
   return await TaskAssignment.create({ taskId, assignedTo, groupId });
 };
 
-module.exports = { existsByTaskUserGroup, createTaskAssignment };
+const findByGroupIdWithTaskAndStudent = async (groupId) => {
+  return await TaskAssignment.find({ groupId })
+    .populate("taskId", "name subject deadline difficulty status")
+    .populate("assignedTo", "name email");
+};
+
+const deleteByGroupId = async (groupId) => {
+  return await TaskAssignment.deleteMany({ groupId });
+};
+
+module.exports = {
+  existsByTaskUserGroup,
+  createTaskAssignment,
+  findByGroupIdWithTaskAndStudent,
+  deleteByGroupId,
+};

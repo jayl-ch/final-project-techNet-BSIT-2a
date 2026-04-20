@@ -5,9 +5,9 @@ const setPriority = async (req, res) => {
   const taskId = req.params.id;
 
   try {
-    const priorityLevel = await setPriorityLevel(taskId, id);
+    const priorityRecord = await setPriorityLevel(taskId, id);
 
-    res.status(201).json({ priorityLevel });
+    res.status(201).json({ priorityLevel: priorityRecord.priorityLevel });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
