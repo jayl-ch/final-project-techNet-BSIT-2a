@@ -11,4 +11,22 @@ const findByGroupStudent = async (groupId, studentId) => {
   });
 };
 
-module.exports = { createMember, findByGroupStudent };
+const findByStudentId = async (studentId) => {
+  return await GroupMember.find({ studentId });
+};
+
+const findByGroupIdWithStudent = async (groupId) => {
+  return await GroupMember.find({ groupId }).populate("studentId", "name email");
+};
+
+const deleteByGroupId = async (groupId) => {
+  return await GroupMember.deleteMany({ groupId });
+};
+
+module.exports = {
+  createMember,
+  findByGroupStudent,
+  findByStudentId,
+  findByGroupIdWithStudent,
+  deleteByGroupId,
+};
