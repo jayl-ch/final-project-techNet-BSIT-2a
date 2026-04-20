@@ -4,6 +4,7 @@ const {
   createGroup,
   joinGroup,
   getGroups,
+  getGroupDetails,
   deleteGroup,
 } = require("../controllers/group.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
@@ -12,6 +13,8 @@ const groupRouter = express.Router();
 
 // GET GROUPS
 groupRouter.get("/group", authMiddleware, getGroups);
+// GET GROUP DETAILS (MEMBERS + ASSIGNED TASKS)
+groupRouter.get("/group/:id/details", authMiddleware, getGroupDetails);
 // CREATE GROUP
 groupRouter.post("/group/create", authMiddleware, createGroup);
 // JOIN GROUP

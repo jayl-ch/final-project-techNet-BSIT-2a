@@ -26,10 +26,29 @@ const joinGroup = async (req, res) => {
 const getGroups = async (req, res) => {
   const { id } = req.student;
   try {
-    const groups = await groupService.getGroupsByOwner(id);
+    const groups = await groupService.getGroupsByStudent(id);
     res.status(200).json({ groups });
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+const getGroupDetails = async (req, res) => {
+  const { id } = req.student;
+
+  try {
+    const data = await groupService.getGroupDetails(req.params.id, id);
+    res.status(200).json(data);
+  } catch (error) {
+    if (error.message === "Unauthorized") {
+      return res.status(403).json({ message: error.message });
+    }
+
+    if (error.message === "Group not found") {
+      return res.status(404).json({ message: error.message });
+    }
+
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -45,4 +64,10 @@ const deleteGroup = async (req, res) => {
   }
 };
 
-module.exports = { createGroup, joinGroup, getGroups, deleteGroup };
+module.exports = {
+  createGroup,
+  joinGroup,
+  getGroups,
+  getGroupDetails,
+  deleteGroup,
+};
