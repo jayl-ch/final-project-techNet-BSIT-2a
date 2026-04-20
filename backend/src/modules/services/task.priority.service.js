@@ -1,13 +1,7 @@
 const { findByIdAndCreator } = require("../repositories/task.repo");
-const { createPriorityLevel } = require("../repositories/task.priority.repo");
+const { upsertPriorityLevel } = require("../repositories/task.priority.repo");
 
-const setPriorityLevel = async (taskId, studentId) => {
-  const task = await findByIdAndCreator(taskId, studentId);
-
-  if (!task) throw new Error("Task not found");
-
-  const { deadline, difficulty } = task;
-
+const calculatePriorityLevel = ({ deadline, difficulty }) => {
   const now = new Date();
   const dueDate = new Date(deadline);
 
@@ -22,15 +16,38 @@ const setPriorityLevel = async (taskId, studentId) => {
   else if (daysRemaining <= 14) urgencyScore = 2;
   else urgencyScore = 1;
 
-  const priorityScore = urgencyScore * 0.7 + difficulty * 0.3;
+  const normalizedDifficulty = Number.isFinite(difficulty) ? difficulty : 1;
+  const priorityScore = urgencyScore * 0.7 + normalizedDifficulty * 0.3;
 
-  let priority;
-
-  if (priorityScore >= 4.5) priority = "CRITICAL";
-  else if (priorityScore >= 3) priority = "MODERATE";
-  else priority = "LOW";
-
-  return await createPriorityLevel(taskId, priority);
+  if (priorityScore >= 4.5) return "CRITICAL";
+  if (priorityScore >= 3) return "MODERATE";
+  return "LOW";
 };
 
-module.exports = { setPriorityLevel };
+const setPriorityLevel = async (taskId, studentId) => {
+  const task = await findByIdAndCreator(taskId, studentId);
+
+  if (!task) throw new Error("Task not found");
+
+  const priorityLevel = calculatePriorityLevel(task);
+  return await upsertPriorityLevel(taskId, priorityLevel);
+};
+
+const syncTaskPriorities = async (tasks) => {
+  if (!Array.isArray(tasks) || !tasks.length) {
+    return {};
+  }
+
+  const syncedPriorityEntries = await Promise.all(
+    tasks.map(async (task) => {
+      const priorityLevel = calculatePriorityLevel(task);
+      const syncedPriority = await upsertPriorityLevel(task._id, priorityLevel);
+
+      return [String(task._id), syncedPriority.priorityLevel];
+    }),
+  );
+
+  return Object.fromEntries(syncedPriorityEntries);
+};
+
+module.exports = { setPriorityLevel, syncTaskPriorities, calculatePriorityLevel };

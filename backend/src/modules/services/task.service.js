@@ -5,9 +5,21 @@ const {
   updateById,
   deleteById,
 } = require("../repositories/task.repo");
+const { syncTaskPriorities } = require("./task.priority.service");
 
 const getTasksByCreator = async (id) => {
-  return await findByCreator(id);
+  const tasks = await findByCreator(id);
+  const priorityByTaskId = await syncTaskPriorities(tasks);
+
+  return tasks.map((task) => {
+    const taskData =
+      typeof task.toObject === "function" ? task.toObject() : task;
+
+    return {
+      ...taskData,
+      priorityLevel: priorityByTaskId[String(taskData._id)] || "LOW",
+    };
+  });
 };
 
 const createTask = async (task, id) => {
@@ -15,7 +27,7 @@ const createTask = async (task, id) => {
 };
 
 const updateTask = async (taskId, studentId, taskInfo) => {
-  const allowedFields = ["name", "difficulty", "deadline"];
+  const allowedFields = ["name", "difficulty", "deadline", "subject", "status"];
   const task = {};
 
   for (let key of allowedFields) {
