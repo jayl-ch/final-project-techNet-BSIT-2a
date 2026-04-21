@@ -12,4 +12,11 @@ const findByEmail = async (email) => {
   return await Student.findOne({ email });
 };
 
-module.exports = { findById, create, findByEmail };
+const updateById = async (_id, updates) => {
+  return await Student.findByIdAndUpdate(_id, updates, {
+    new: true,
+    runValidators: true,
+  });
+};
+
+module.exports = { findById, create, findByEmail, updateById };
