@@ -4,6 +4,10 @@ const cors = require("cors");
 const helmet = require("helmet");
 
 const connectDB = require("./config/db");
+const {
+  notFoundHandler,
+  errorHandler,
+} = require("./modules/middlewares/error.middleware");
 
 const studentRouter = require("./modules/routes/student.router");
 const groupRouter = require("./modules/routes/group.router");
@@ -20,6 +24,9 @@ app.use(cors());
 routers.forEach((router) => {
   app.use("/api", router);
 });
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 async function start() {
   const port = process.env.PORT;
