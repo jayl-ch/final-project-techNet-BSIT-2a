@@ -4,6 +4,8 @@ const taskSchema = new mongoose.Schema(
     name: {
       type: String,
       maxlength: 20,
+      required: true,
+      trim: true,
     },
     difficulty: {
       type: Number,
@@ -16,6 +18,8 @@ const taskSchema = new mongoose.Schema(
     subject: {
       type: String,
       maxlength: 20,
+      default: "General",
+      trim: true,
     },
     status: {
       type: String,
@@ -25,10 +29,15 @@ const taskSchema = new mongoose.Schema(
     creator: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Student",
+      required: true,
+      index: true,
     },
   },
   { timestamps: true },
 );
+
+taskSchema.index({ creator: 1, status: 1, deadline: 1 });
+taskSchema.index({ creator: 1, updatedAt: -1 });
 
 const Task = mongoose.model("Task", taskSchema);
 
