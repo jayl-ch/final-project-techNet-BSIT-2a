@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
 require("dotenv").config();
 
 const {
@@ -8,6 +9,56 @@ const {
   findByEmail,
   updateById,
 } = require("../repositories/student.repo");
+const {
+  createToken,
+  findActiveByTokenHash,
+  revokeByTokenHash,
+  revokeByStudentId,
+} = require("../repositories/refresh.token.repo");
+const {
+  BadRequestError,
+  ConflictError,
+  UnauthorizedError,
+} = require("../utils/errors");
+
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
+const REFRESH_TOKEN_SECRET =
+  process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET;
+const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || "15m";
+const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 7);
+
+const getTokenHash = (token) => {
+  return crypto.createHash("sha256").update(token).digest("hex");
+};
+
+const signAccessToken = (studentId) => {
+  return jwt.sign({ id: studentId, type: "access" }, ACCESS_TOKEN_SECRET, {
+    expiresIn: ACCESS_TOKEN_TTL,
+  });
+};
+
+const signRefreshToken = (studentId, tokenId) => {
+  return jwt.sign(
+    { id: studentId, tokenId, type: "refresh" },
+    REFRESH_TOKEN_SECRET,
+    { expiresIn: `${REFRESH_TOKEN_TTL_DAYS}d` },
+  );
+};
+
+const issueTokenPair = async (studentId) => {
+  const tokenId = crypto.randomUUID();
+  const accessToken = signAccessToken(studentId);
+  const refreshToken = signRefreshToken(studentId, tokenId);
+
+  await createToken({
+    studentId,
+    tokenId,
+    tokenHash: getTokenHash(refreshToken),
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_TTL_DAYS * 24 * 60 * 60 * 1000),
+  });
+
+  return { accessToken, refreshToken };
+};
 
 const toPublicStudent = (student) => {
   if (!student) return null;
@@ -23,21 +74,31 @@ const toPublicStudent = (student) => {
 
 const getAuthStudent = async (id) => {
   const student = await findById(id);
-  if (!student) throw new Error("User not authenticated");
+  if (!student) throw new UnauthorizedError("User not authenticated");
 
   return toPublicStudent(student);
 };
 
-const createStudent = async (salt, studentInfo) => {
+const createStudent = async (studentInfo) => {
   const { name, email, password } = studentInfo;
+  const normalizedName = typeof name === "string" ? name.trim() : "";
+  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
 
-  const existingStudent = await findByEmail(email);
-  if (existingStudent) throw new Error("Email is already in use");
+  if (!normalizedName || !normalizedEmail || !password) {
+    throw new BadRequestError("Name, email, and password are required");
+  }
 
-  const hashedPassword = await bcrypt.hash(password, salt);
+  if (password.length < 6) {
+    throw new BadRequestError("Password must be at least 6 characters");
+  }
+
+  const existingStudent = await findByEmail(normalizedEmail);
+  if (existingStudent) throw new ConflictError("Email is already in use");
+
+  const hashedPassword = await bcrypt.hash(password, 10);
   const student = await create({
-    name,
-    email,
+    name: normalizedName,
+    email: normalizedEmail,
     password: hashedPassword,
   });
 
@@ -46,7 +107,7 @@ const createStudent = async (salt, studentInfo) => {
 
 const updateAuthStudent = async (id, profileInfo) => {
   const student = await findById(id);
-  if (!student) throw new Error("User not authenticated");
+  if (!student) throw new UnauthorizedError("User not authenticated");
 
   const { name, email, currentPassword, newPassword } = profileInfo;
   const normalizedName = typeof name === "string" ? name.trim() : undefined;
@@ -62,7 +123,7 @@ const updateAuthStudent = async (id, profileInfo) => {
   if (normalizedEmail && normalizedEmail !== student.email) {
     const existingStudent = await findByEmail(normalizedEmail);
     if (existingStudent && String(existingStudent._id) !== String(id)) {
-      throw new Error("Email is already in use");
+      throw new ConflictError("Email is already in use");
     }
 
     updates.email = normalizedEmail;
@@ -70,23 +131,23 @@ const updateAuthStudent = async (id, profileInfo) => {
 
   if (typeof newPassword === "string" && newPassword.length > 0) {
     if (!currentPassword) {
-      throw new Error("Current password is required to change password");
+      throw new BadRequestError("Current password is required to change password");
     }
 
     const isMatch = await bcrypt.compare(currentPassword, student.password);
     if (!isMatch) {
-      throw new Error("Current password is incorrect");
+      throw new BadRequestError("Current password is incorrect");
     }
 
     if (newPassword.length < 6) {
-      throw new Error("New password must be at least 6 characters");
+      throw new BadRequestError("New password must be at least 6 characters");
     }
 
     updates.password = await bcrypt.hash(newPassword, 10);
   }
 
   if (!Object.keys(updates).length) {
-    throw new Error("No profile fields provided for update");
+    throw new BadRequestError("No profile fields provided for update");
   }
 
   const updatedStudent = await updateById(id, updates);
@@ -94,17 +155,74 @@ const updateAuthStudent = async (id, profileInfo) => {
 };
 
 const loginStudent = async ({ email, password }) => {
-  const student = await findByEmail(email);
+  const normalizedEmail = typeof email === "string" ? email.trim().toLowerCase() : "";
+  if (!normalizedEmail || !password) {
+    throw new BadRequestError("Email and password are required");
+  }
 
-  if (!student) throw new Error("Student not found");
+  const student = await findByEmail(normalizedEmail);
+
+  if (!student) throw new UnauthorizedError("Invalid credentials");
 
   const isMatch = await bcrypt.compare(password, student.password);
 
-  if (!isMatch) throw new Error("Invalid credentials");
+  if (!isMatch) throw new UnauthorizedError("Invalid credentials");
 
-  return jwt.sign({ id: student._id }, process.env.JWT_SECRET, {
-    expiresIn: "1h",
-  });
+  return await issueTokenPair(student._id);
+};
+
+const refreshAccessToken = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new UnauthorizedError("Refresh token is required");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+  } catch (error) {
+    throw new UnauthorizedError("Invalid or expired refresh token");
+  }
+
+  if (decoded?.type !== "refresh" || !decoded?.tokenId) {
+    throw new UnauthorizedError("Invalid refresh token");
+  }
+
+  const tokenHash = getTokenHash(refreshToken);
+  const tokenRecord = await findActiveByTokenHash(tokenHash);
+
+  if (!tokenRecord) {
+    throw new UnauthorizedError("Refresh token is no longer valid");
+  }
+
+  if (tokenRecord.expiresAt <= new Date()) {
+    await revokeByTokenHash(tokenHash);
+    throw new UnauthorizedError("Refresh token has expired");
+  }
+
+  await revokeByTokenHash(tokenHash);
+
+  return await issueTokenPair(decoded.id);
+};
+
+const logoutStudent = async (refreshToken) => {
+  if (!refreshToken) {
+    throw new BadRequestError("Refresh token is required");
+  }
+
+  let decoded;
+  try {
+    decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET);
+  } catch (error) {
+    throw new UnauthorizedError("Invalid or expired refresh token");
+  }
+
+  await revokeByTokenHash(getTokenHash(refreshToken));
+
+  if (decoded?.id) {
+    await revokeByStudentId(decoded.id);
+  }
+
+  return { success: true };
 };
 
 module.exports = {
@@ -112,4 +230,6 @@ module.exports = {
   updateAuthStudent,
   createStudent,
   loginStudent,
+  refreshAccessToken,
+  logoutStudent,
 };
