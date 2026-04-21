@@ -1,5 +1,6 @@
 const { findByIdAndCreator } = require("../repositories/task.repo");
 const { upsertPriorityLevel } = require("../repositories/task.priority.repo");
+const { NotFoundError } = require("../utils/errors");
 
 const calculatePriorityLevel = ({ deadline, difficulty }) => {
   const now = new Date();
@@ -27,7 +28,7 @@ const calculatePriorityLevel = ({ deadline, difficulty }) => {
 const setPriorityLevel = async (taskId, studentId) => {
   const task = await findByIdAndCreator(taskId, studentId);
 
-  if (!task) throw new Error("Task not found");
+  if (!task) throw new NotFoundError("Task not found");
 
   const priorityLevel = calculatePriorityLevel(task);
   return await upsertPriorityLevel(taskId, priorityLevel);

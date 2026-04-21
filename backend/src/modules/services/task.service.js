@@ -6,6 +6,11 @@ const {
   deleteById,
 } = require("../repositories/task.repo");
 const { syncTaskPriorities } = require("./task.priority.service");
+const {
+  ForbiddenError,
+  NotFoundError,
+  BadRequestError,
+} = require("../utils/errors");
 
 const getTasksByCreator = async (id) => {
   const tasks = await findByCreator(id);
@@ -23,6 +28,10 @@ const getTasksByCreator = async (id) => {
 };
 
 const createTask = async (task, id) => {
+  if (!task?.name || !task?.deadline) {
+    throw new BadRequestError("Task name and deadline are required");
+  }
+
   return await create(task, id);
 };
 
@@ -38,12 +47,12 @@ const updateTask = async (taskId, studentId, taskInfo) => {
 
   const foundedTask = await findByIdAndCreator(taskId, studentId);
 
-  if (!foundedTask) throw new Error("Unauthorized");
+  if (!foundedTask) throw new ForbiddenError("Unauthorized");
 
   const newTask = await updateById(taskId, task);
 
   if (!newTask) {
-    return res.status(404).json({ message: "Task not found" });
+    throw new NotFoundError("Task not found");
   }
 
   return newTask;
@@ -51,7 +60,7 @@ const updateTask = async (taskId, studentId, taskInfo) => {
 
 const deleteTask = async (taskId, studentId) => {
   const task = await findByIdAndCreator(taskId, studentId);
-  if (!task) throw new Error("Unauthorized");
+  if (!task) throw new ForbiddenError("Unauthorized");
 
   await deleteById(taskId);
   return task;
