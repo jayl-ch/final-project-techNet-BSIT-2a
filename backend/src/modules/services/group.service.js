@@ -4,11 +4,14 @@ const {
   findByGroupStudent,
   findByStudentId,
   findByGroupIdWithStudent,
+  countMembersByGroupIds,
+  deleteByGroupStudent,
   deleteByGroupId,
 } = require("../repositories/group.member.repo");
 const {
   findByGroupIdWithTaskAndStudent,
   deleteByGroupId: deleteAssignmentsByGroupId,
+  deleteByGroupAndStudent,
 } = require("../repositories/task.assignment.repo");
 
 const generateInviteCode = () => {
@@ -82,7 +85,17 @@ const getGroupsByStudent = async (id) => {
     ? await groupRepo.findByIds(memberGroupIds)
     : [];
 
-  return [...ownedGroups, ...joinedGroups];
+  const groups = [...ownedGroups, ...joinedGroups];
+  const groupIds = groups.map((group) => group._id);
+  const memberCounts = groupIds.length
+    ? await countMembersByGroupIds(groupIds)
+    : {};
+
+  return groups.map((group) => ({
+    ...group.toObject(),
+    memberCount: memberCounts[String(group._id)] || 0,
+    isOwner: String(group.owner) === String(id),
+  }));
 };
 
 const getGroupDetails = async (groupId, studentId) => {
@@ -148,9 +161,13 @@ const getGroupDetails = async (groupId, studentId) => {
 };
 
 const deleteById = async (groupId, studentId) => {
-  const group = await groupRepo.findByIdAndOwner(groupId, studentId);
+  const group = await groupRepo.findByGroupId(groupId);
 
   if (!group) throw new Error("Group not found");
+
+  if (String(group.owner) !== String(studentId)) {
+    throw new Error("Only admin can delete group");
+  }
 
   await Promise.all([
     deleteAssignmentsByGroupId(groupId),
@@ -161,10 +178,66 @@ const deleteById = async (groupId, studentId) => {
   return group;
 };
 
+const removeMember = async (groupId, adminId, memberId) => {
+  const group = await groupRepo.findByGroupId(groupId);
+
+  if (!group) throw new Error("Group not found");
+
+  if (String(group.owner) !== String(adminId)) {
+    throw new Error("Only admin can remove members");
+  }
+
+  if (String(adminId) === String(memberId)) {
+    throw new Error("Admin cannot remove themselves");
+  }
+
+  const member = await findByGroupStudent(groupId, memberId);
+
+  if (!member) {
+    throw new Error("Member not found in this group");
+  }
+
+  if (member.role === "admin") {
+    throw new Error("Admin cannot be removed");
+  }
+
+  await Promise.all([
+    deleteByGroupStudent(groupId, memberId),
+    deleteByGroupAndStudent(groupId, memberId),
+  ]);
+
+  return { memberId };
+};
+
+const leaveGroup = async (groupId, studentId) => {
+  const group = await groupRepo.findByGroupId(groupId);
+
+  if (!group) throw new Error("Group not found");
+
+  if (String(group.owner) === String(studentId)) {
+    throw new Error("Admin cannot leave group. Delete the group instead");
+  }
+
+  const member = await findByGroupStudent(groupId, studentId);
+
+  if (!member) {
+    throw new Error("You are not a member of this group");
+  }
+
+  await Promise.all([
+    deleteByGroupStudent(groupId, studentId),
+    deleteByGroupAndStudent(groupId, studentId),
+  ]);
+
+  return { groupId };
+};
+
 module.exports = {
   createGroup,
   joinGroup,
   getGroupsByStudent,
   getGroupDetails,
   deleteById,
+  removeMember,
+  leaveGroup,
 };

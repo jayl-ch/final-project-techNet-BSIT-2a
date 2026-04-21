@@ -6,6 +6,8 @@ const {
   getGroups,
   getGroupDetails,
   deleteGroup,
+  removeMember,
+  leaveGroup,
 } = require("../controllers/group.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 
@@ -21,5 +23,9 @@ groupRouter.post("/group/create", authMiddleware, createGroup);
 groupRouter.post("/group/join", authMiddleware, joinGroup);
 // DELETE GROUP
 groupRouter.delete("/group/delete/:id", authMiddleware, deleteGroup);
+// REMOVE MEMBER (ADMIN ONLY)
+groupRouter.delete("/group/:id/member/:memberId", authMiddleware, removeMember);
+// LEAVE GROUP (MEMBER ONLY)
+groupRouter.delete("/group/:id/leave", authMiddleware, leaveGroup);
 
 module.exports = groupRouter;

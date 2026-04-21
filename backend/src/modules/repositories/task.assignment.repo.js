@@ -18,9 +18,14 @@ const deleteByGroupId = async (groupId) => {
   return await TaskAssignment.deleteMany({ groupId });
 };
 
+const deleteByGroupAndStudent = async (groupId, assignedTo) => {
+  return await TaskAssignment.deleteMany({ groupId, assignedTo });
+};
+
 module.exports = {
   existsByTaskUserGroup,
   createTaskAssignment,
   findByGroupIdWithTaskAndStudent,
   deleteByGroupId,
+  deleteByGroupAndStudent,
 };
