@@ -10,7 +10,7 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 - **Framework:** Express.js
 - **Database:** MongoDB (Mongoose ODM)
 - **Authentication:** JWT, bcrypt
-- **Security Middlware:** helmet,cors
+- **Security Middleware:** helmet, cors
 - **Environment Management:** dotenv
 - **Dev Tools:** nodemon
 
@@ -36,7 +36,7 @@ A RESTful API for **TaskWise** — a smart web-based student task management sys
 │   │   │   └── group.member.model.js
 │   │   │   └── group.model.js
 │   │   │   └── student.model.js
-│   │   │   └── task.assigment.model.js
+│   │   │   └── task.assignment.model.js
 │   │   │   └── task.model.js
 │   │   │   └── task.priority.model.js
 │   │   └── /repositories
@@ -104,30 +104,43 @@ npm start
 
 ### Group `/api/group`
 
-| Method | Endpoint                | Description          |
-| ------ | ----------------------- | -------------------- |
-| GET    | `/api/group`            | Get all groups       |
-| POST   | `/api/group/create`     | Create a group       |
-| POST   | `/api/group/join`       | Join via invite code |
-| DELETE | `/api/group/delete/:id` | Delete group         |
+| Method | Endpoint                         | Description                         |
+| ------ | -------------------------------- | ----------------------------------- |
+| GET    | `/api/group`                     | Get groups where student is a member |
+| GET    | `/api/group/:id/details`         | Get group members and assigned tasks |
+| POST   | `/api/group/create`              | Create a group (creator becomes admin) |
+| POST   | `/api/group/join`                | Join via invite code                |
+| DELETE | `/api/group/delete/:id`          | Delete group (admin only)           |
+| DELETE | `/api/group/:id/member/:memberId` | Remove member (admin only)          |
+| DELETE | `/api/group/:id/leave`           | Leave group (member only)           |
 
 ### Student `/api/student`
 
-| Method | Endpoint                | Description      |
-| ------ | ----------------------- | ---------------- |
-| POST   | `/api/student/register` | Register account |
-| POST   | `/api/student/login`    | Login account    |
+| Method | Endpoint                | Description                               |
+| ------ | ----------------------- | ----------------------------------------- |
+| GET    | `/api/student`          | Get authenticated student profile         |
+| PATCH  | `/api/student`          | Update name/email and optional password   |
+| POST   | `/api/student/register` | Register account                          |
+| POST   | `/api/student/login`    | Login account                             |
 
 ### Task `/api/task`
 
-| Method | Endpoint                 | Description            |
-| ------ | ------------------------ | ---------------------- |
-| GET    | `/api/task`              | Get all tasks          |
-| POST   | `/api/task/create`       | Create a task          |
-| PATCH  | `/api/task/update/:id`   | Update a task          |
-| POST   | `/api/task/assign`       | Assign a task          |
-| POST   | `/api/task/priority/:id` | Set the priority level |
-| DELETE | `/api/task/delete/:id`   | Delete a task          |
+| Method | Endpoint                 | Description                             |
+| ------ | ------------------------ | --------------------------------------- |
+| GET    | `/api/task`              | Get all tasks                           |
+| POST   | `/api/task/create`       | Create a task                           |
+| PATCH  | `/api/task/update/:id`   | Update a task                           |
+| POST   | `/api/task/assign`       | Assign task to group member (admin only) |
+| POST   | `/api/task/priority/:id` | Set task priority level                 |
+| DELETE | `/api/task/delete/:id`   | Delete a task                           |
+
+---
+
+## 🔐 Role Rules
+
+- Group admin can: delete group, remove members, assign tasks.
+- Group member can: join group, view group details, leave group.
+- Group admin cannot use leave-group endpoint; they must delete the group instead.
 
 ---
 
