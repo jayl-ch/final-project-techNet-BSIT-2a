@@ -60,7 +60,63 @@ const deleteGroup = async (req, res) => {
 
     res.status(200).json({ group });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    if (error.message === "Group not found") {
+      return res.status(404).json({ message: error.message });
+    }
+
+    if (error.message === "Only admin can delete group") {
+      return res.status(403).json({ message: error.message });
+    }
+
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const removeMember = async (req, res) => {
+  const { id } = req.student;
+
+  try {
+    const removed = await groupService.removeMember(
+      req.params.id,
+      id,
+      req.params.memberId,
+    );
+
+    res.status(200).json({ removed });
+  } catch (error) {
+    if (error.message === "Group not found") {
+      return res.status(404).json({ message: error.message });
+    }
+
+    if (
+      error.message === "Only admin can remove members" ||
+      error.message === "Admin cannot remove themselves" ||
+      error.message === "Admin cannot be removed"
+    ) {
+      return res.status(403).json({ message: error.message });
+    }
+
+    return res.status(400).json({ message: error.message });
+  }
+};
+
+const leaveGroup = async (req, res) => {
+  const { id } = req.student;
+
+  try {
+    const result = await groupService.leaveGroup(req.params.id, id);
+
+    res.status(200).json({ result });
+  } catch (error) {
+    if (error.message === "Group not found") {
+      return res.status(404).json({ message: error.message });
+    }
+
+    if (error.message === "Admin cannot leave group. Delete the group instead") {
+      return res.status(403).json({ message: error.message });
+    }
+
+    return res.status(400).json({ message: error.message });
   }
 };
 
@@ -70,4 +126,6 @@ module.exports = {
   getGroups,
   getGroupDetails,
   deleteGroup,
+  removeMember,
+  leaveGroup,
 };
