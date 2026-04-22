@@ -1,16 +1,13 @@
 const { setPriorityLevel } = require("../services/task.priority.service");
+const asyncHandler = require("../middlewares/async.handler");
 
-const setPriority = async (req, res) => {
+const setPriority = asyncHandler(async (req, res) => {
   const { id } = req.student;
   const taskId = req.params.id;
 
-  try {
-    const priorityLevel = await setPriorityLevel(taskId, id);
+  const priorityRecord = await setPriorityLevel(taskId, id);
 
-    res.status(201).json({ priorityLevel });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  res.status(201).json({ priorityLevel: priorityRecord.priorityLevel });
+});
 
 module.exports = { setPriority };

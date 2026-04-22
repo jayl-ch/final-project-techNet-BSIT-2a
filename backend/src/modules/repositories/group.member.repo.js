@@ -11,4 +11,40 @@ const findByGroupStudent = async (groupId, studentId) => {
   });
 };
 
-module.exports = { createMember, findByGroupStudent };
+const findByStudentId = async (studentId) => {
+  return await GroupMember.find({ studentId });
+};
+
+const findByGroupIdWithStudent = async (groupId) => {
+  return await GroupMember.find({ groupId }).populate("studentId", "name email");
+};
+
+const countMembersByGroupIds = async (groupIds) => {
+  const counts = await GroupMember.aggregate([
+    { $match: { groupId: { $in: groupIds } } },
+    { $group: { _id: "$groupId", count: { $sum: 1 } } },
+  ]);
+
+  return counts.reduce((acc, item) => {
+    acc[String(item._id)] = item.count;
+    return acc;
+  }, {});
+};
+
+const deleteByGroupStudent = async (groupId, studentId) => {
+  return await GroupMember.findOneAndDelete({ groupId, studentId });
+};
+
+const deleteByGroupId = async (groupId) => {
+  return await GroupMember.deleteMany({ groupId });
+};
+
+module.exports = {
+  createMember,
+  findByGroupStudent,
+  findByStudentId,
+  findByGroupIdWithStudent,
+  countMembersByGroupIds,
+  deleteByGroupStudent,
+  deleteByGroupId,
+};
