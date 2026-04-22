@@ -1,20 +1,32 @@
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
+const { UnauthorizedError } = require("../utils/errors");
+
+const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET || process.env.JWT_SECRET;
 
 const authMiddleware = (req, res, next) => {
+  const accessTokenFromCookie = req.cookies?.taskwise_access_token;
   const authHeader = req.headers.authorization;
+  const authTokenFromHeader = authHeader?.startsWith("Bearer ")
+    ? authHeader.split(" ")[1]
+    : null;
+  const token = accessTokenFromCookie || authTokenFromHeader;
 
-  if (!authHeader)
-    return res.status(401).json({ message: "No token provided" });
-
-  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return next(new UnauthorizedError("Access token is required"));
+  }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, ACCESS_TOKEN_SECRET);
+
+    if (decoded?.type && decoded.type !== "access") {
+      return next(new UnauthorizedError("Invalid access token"));
+    }
+
     req.student = decoded;
-    next();
+    return next();
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    return next(new UnauthorizedError("Invalid or expired token"));
   }
 };
 

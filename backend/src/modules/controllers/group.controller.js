@@ -1,48 +1,63 @@
 const groupService = require("../services/group.service");
+const asyncHandler = require("../middlewares/async.handler");
 
-const createGroup = async (req, res) => {
+const createGroup = asyncHandler(async (req, res) => {
   const group = req.body;
   const { id } = req.student;
-  try {
-    const newGroup = await groupService.createGroup(group, id);
-    res.status(201).json({ newGroup });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  const newGroup = await groupService.createGroup(group, id);
+  res.status(201).json({ newGroup });
+});
 
-const joinGroup = async (req, res) => {
+const joinGroup = asyncHandler(async (req, res) => {
   const { code } = req.body;
   const { id } = req.student;
+  const member = await groupService.joinGroup(code, id);
+  res.status(200).json({ member });
+});
 
-  try {
-    const member = await groupService.joinGroup(code, id);
-    res.status(200).json({ member });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-const getGroups = async (req, res) => {
+const getGroups = asyncHandler(async (req, res) => {
   const { id } = req.student;
-  try {
-    const groups = await groupService.getGroupsByOwner(id);
-    res.status(200).json({ groups });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+  const groups = await groupService.getGroupsByStudent(id);
+  res.status(200).json({ groups });
+});
 
-const deleteGroup = async (req, res) => {
+const getGroupDetails = asyncHandler(async (req, res) => {
   const { id } = req.student;
+  const data = await groupService.getGroupDetails(req.params.id, id);
+  res.status(200).json(data);
+});
 
-  try {
-    const group = await groupService.deleteById(req.params.id, id);
+const deleteGroup = asyncHandler(async (req, res) => {
+  const { id } = req.student;
+  const group = await groupService.deleteById(req.params.id, id);
 
-    res.status(200).json({ group });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
+  res.status(200).json({ group });
+});
+
+const removeMember = asyncHandler(async (req, res) => {
+  const { id } = req.student;
+  const removed = await groupService.removeMember(
+    req.params.id,
+    id,
+    req.params.memberId,
+  );
+
+  res.status(200).json({ removed });
+});
+
+const leaveGroup = asyncHandler(async (req, res) => {
+  const { id } = req.student;
+  const result = await groupService.leaveGroup(req.params.id, id);
+
+  res.status(200).json({ result });
+});
+
+module.exports = {
+  createGroup,
+  joinGroup,
+  getGroups,
+  getGroupDetails,
+  deleteGroup,
+  removeMember,
+  leaveGroup,
 };
-
-module.exports = { createGroup, joinGroup, getGroups, deleteGroup };
