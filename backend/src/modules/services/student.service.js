@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
+const { OAuth2Client } = require("google-auth-library");
 require("dotenv").config();
 
 const {
@@ -26,6 +27,8 @@ const REFRESH_TOKEN_SECRET =
   process.env.REFRESH_TOKEN_SECRET || process.env.JWT_SECRET;
 const ACCESS_TOKEN_TTL = process.env.ACCESS_TOKEN_TTL || "15m";
 const REFRESH_TOKEN_TTL_DAYS = Number(process.env.REFRESH_TOKEN_TTL_DAYS || 7);
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 const getTokenHash = (token) => {
   return crypto.createHash("sha256").update(token).digest("hex");
@@ -171,6 +174,48 @@ const loginStudent = async ({ email, password }) => {
   return await issueTokenPair(student._id);
 };
 
+const loginStudentWithGoogle = async ({ idToken }) => {
+  if (!idToken || typeof idToken !== "string") {
+    throw new BadRequestError("Google ID token is required");
+  }
+
+  if (!GOOGLE_CLIENT_ID) {
+    throw new BadRequestError("Google sign-in is not configured on the server");
+  }
+
+  let ticket;
+  try {
+    ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: GOOGLE_CLIENT_ID,
+    });
+  } catch (error) {
+    throw new UnauthorizedError("Invalid Google ID token");
+  }
+
+  const payload = ticket.getPayload();
+  const email = typeof payload?.email === "string" ? payload.email.trim().toLowerCase() : "";
+  const name = typeof payload?.name === "string" ? payload.name.trim() : "";
+  const emailVerified = Boolean(payload?.email_verified);
+
+  if (!emailVerified || !email) {
+    throw new UnauthorizedError("Google account email is not verified");
+  }
+
+  let student = await findByEmail(email);
+
+  if (!student) {
+    const generatedPassword = await bcrypt.hash(crypto.randomUUID(), 10);
+    student = await create({
+      name: name || email.split("@")[0],
+      email,
+      password: generatedPassword,
+    });
+  }
+
+  return await issueTokenPair(student._id);
+};
+
 const refreshAccessToken = async (refreshToken) => {
   if (!refreshToken) {
     throw new UnauthorizedError("Refresh token is required");
@@ -230,6 +275,7 @@ module.exports = {
   updateAuthStudent,
   createStudent,
   loginStudent,
+  loginStudentWithGoogle,
   refreshAccessToken,
   logoutStudent,
 };

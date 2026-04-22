@@ -6,6 +6,7 @@ const {
   getAuthStudent,
   createStudent,
   findStudent,
+  signInWithGoogle,
   updateAuthStudent,
   refreshSession,
   logoutStudent,
@@ -16,6 +17,7 @@ const validateRequest = require("../middlewares/validate.middleware");
 const {
   validateRegister,
   validateLogin,
+  validateGoogleLogin,
   validateRefreshPayload,
   validateProfileUpdate,
 } = require("../validators/request.validators");
@@ -36,6 +38,13 @@ studentRouter.post("/student/register", validateRequest(validateRegister), creat
 
 // LOGIN
 studentRouter.post("/student/login", validateRequest(validateLogin), findStudent);
+
+// GOOGLE LOGIN
+studentRouter.post(
+  "/student/google",
+  validateRequest(validateGoogleLogin),
+  signInWithGoogle,
+);
 
 // REFRESH SESSION
 studentRouter.post(

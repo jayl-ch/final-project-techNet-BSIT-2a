@@ -64,6 +64,18 @@ const findStudent = asyncHandler(async (req, res) => {
   });
 });
 
+const signInWithGoogle = asyncHandler(async (req, res) => {
+  const tokens = await studentService.loginStudentWithGoogle(req.body);
+  writeAuthCookies(res, tokens);
+
+  res.status(200).json({
+    token: "cookie-session",
+    accessToken: undefined,
+    refreshToken: undefined,
+    message: "Login successful",
+  });
+});
+
 const refreshSession = asyncHandler(async (req, res) => {
   const refreshToken = req.cookies?.taskwise_refresh_token || req.body?.refreshToken;
   const tokens = await studentService.refreshAccessToken(refreshToken);
@@ -90,6 +102,7 @@ module.exports = {
   updateAuthStudent,
   createStudent,
   findStudent,
+  signInWithGoogle,
   refreshSession,
   logoutStudent,
 };
