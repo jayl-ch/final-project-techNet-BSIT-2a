@@ -43,14 +43,6 @@ const NavBar = () => {
 
           {/* MOBILE: CTA + Toggler */}
           <div className="d-flex d-lg-none align-items-center gap-2">
-            {/* <Nav.Link */}
-            {/*   as={Link} */}
-            {/*   to="/register" */}
-            {/*   onClick={close} */}
-            {/*   className="btn btn-primary btn-sm fw-semibold px-3" */}
-            {/* > */}
-            {/*   Get started */}
-            {/* </Nav.Link> */}
             <Navbar.Toggle
               aria-controls="main-nav"
               className="border-0 shadow-none"
