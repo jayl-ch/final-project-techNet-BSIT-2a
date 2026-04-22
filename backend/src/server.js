@@ -2,6 +2,7 @@ const express = require("express");
 require("dotenv").config();
 const cors = require("cors");
 const helmet = require("helmet");
+const cookieParser = require("cookie-parser");
 
 const connectDB = require("./config/db");
 const {
@@ -9,17 +10,36 @@ const {
   errorHandler,
 } = require("./modules/middlewares/error.middleware");
 
-const studentRouter = require("./modules/routes/student.router");
-const groupRouter = require("./modules/routes/group.router");
-const taskRouter = require("./modules/routes/task.router");
-
 const app = express();
 
-const routers = [studentRouter, groupRouter, taskRouter];
+const routers = [
+  require("./modules/routes/student.router"),
+  require("./modules/routes/group.router"),
+  require("./modules/routes/task.router"),
+];
+
+const allowedOrigins = (
+  process.env.CORS_ORIGIN || "http://localhost:5173,http://127.0.0.1:5173"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
 
 app.use(express.json());
 app.use(helmet());
-app.use(cors());
+app.use(cookieParser());
+app.use(cors(corsOptions));
 
 routers.forEach((router) => {
   app.use("/api", router);
