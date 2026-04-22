@@ -44,7 +44,10 @@ const validateLogin = (req) => {
 };
 
 const validateRefreshPayload = (req) => {
-  const { refreshToken } = req.body || {};
+  const bodyRefreshToken = req.body?.refreshToken;
+  const cookieRefreshToken = req.cookies?.taskwise_refresh_token;
+  const refreshToken = bodyRefreshToken || cookieRefreshToken;
+
   return collect([!isNonEmptyString(refreshToken) && "Refresh token is required"]);
 };
 
