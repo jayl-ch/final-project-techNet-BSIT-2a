@@ -43,6 +43,12 @@ const validateLogin = (req) => {
   ]);
 };
 
+const validateGoogleLogin = (req) => {
+  const { idToken } = req.body || {};
+
+  return collect([!isNonEmptyString(idToken) && "Google ID token is required"]);
+};
+
 const validateRefreshPayload = (req) => {
   const bodyRefreshToken = req.body?.refreshToken;
   const cookieRefreshToken = req.cookies?.taskwise_refresh_token;
@@ -119,6 +125,7 @@ const validateAssignTask = (req) => {
 module.exports = {
   validateRegister,
   validateLogin,
+  validateGoogleLogin,
   validateRefreshPayload,
   validateProfileUpdate,
   validateCreateGroup,
