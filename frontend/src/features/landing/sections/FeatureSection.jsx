@@ -1,6 +1,9 @@
-import { motion, useAnimation } from "framer-motion";
-import { useEffect } from "react";
+import { motion } from "framer-motion";
 import { Card, Container } from "react-bootstrap";
+
+const MotionDiv = motion.div;
+const MotionH2 = motion.h2;
+const MotionP = motion.p;
 
 const feats = [
   {
@@ -53,7 +56,7 @@ const fadeUp = {
 const Features = () => {
   return (
     <div className="overflow-hidden w-100 py-4">
-      <motion.div
+      <MotionDiv
         animate={{
           x: [0, -1620],
         }}
@@ -65,7 +68,7 @@ const Features = () => {
         className="d-flex gap-4 w-max"
       >
         {duplicateSlides.map(({ title, desc, icon }, i) => (
-          <motion.div
+          <MotionDiv
             key={i}
             whileHover={{ scale: 1.05, y: -8 }}
             transition={{ type: "spring", stiffness: 200 }}
@@ -89,9 +92,9 @@ const Features = () => {
                 <Card.Text className="text-dark">{desc}</Card.Text>
               </Card.Body>
             </Card>
-          </motion.div>
+          </MotionDiv>
         ))}
-      </motion.div>
+      </MotionDiv>
     </div>
   );
 };
@@ -100,7 +103,7 @@ const FeatureSection = () => {
   return (
     <section className="py-5 py-lg-6 bg-light">
       <Container id="features" fluid="lg">
-        <motion.div
+        <MotionDiv
           className="row justify-content-center mb-5"
           initial="hidden"
           whileInView="show"
@@ -108,18 +111,18 @@ const FeatureSection = () => {
           variants={container}
         >
           <div className="col-lg-10 col-md-12 text-center">
-            <motion.h2
+            <MotionH2
               className="text-dark display-5 fw-bold mb-3"
               variants={fadeUp}
             >
               Everything You Need
-            </motion.h2>
+            </MotionH2>
 
-            <motion.p className="lead text-dark fs-5" variants={fadeUp}>
+            <MotionP className="lead text-dark fs-5" variants={fadeUp}>
               Powerful features designed for students
-            </motion.p>
+            </MotionP>
           </div>
-        </motion.div>
+        </MotionDiv>
 
         <Features />
       </Container>

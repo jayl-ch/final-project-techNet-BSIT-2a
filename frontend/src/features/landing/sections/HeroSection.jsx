@@ -17,7 +17,7 @@ const fadeUp = {
   show: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] }, // smoother easing
+    transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
   },
 };
 
@@ -40,7 +40,6 @@ const buttonHover = {
 const HeroSection = () => {
   return (
     <section className="hero-section d-flex align-items-center text-white position-relative overflow-hidden">
-      {/* 🔥 ambient animated background */}
       <motion.div
         className="position-absolute top-50 start-50 translate-middle"
         style={{
@@ -66,25 +65,20 @@ const HeroSection = () => {
         as={motion.div}
         variants={container}
         initial="hidden"
-        animate="show" // ✅ on load
+        animate="show"d
         className="position-relative"
         style={{ zIndex: 1 }}
       >
         <motion.div className="row justify-content-center">
           <div className="col-lg-8 col-md-10 text-center">
-            {/* headline */}
             <motion.h1 variants={fadeUp} className="display-3 fw-bold mb-4">
               Manage Your Tasks <span className="text-warning">Smarter</span>
             </motion.h1>
-
-            {/* subtext */}
             <motion.p variants={fadeUp} className="lead fs-5 mb-5 opacity-90">
               Organize assignments, track deadlines, and boost productivity with
               intelligent task management designed for students.
             </motion.p>
           </div>
-
-          {/* buttons */}
           <motion.div
             className="d-flex flex-column flex-sm-row gap-3 align-items-center justify-content-center"
             variants={container}

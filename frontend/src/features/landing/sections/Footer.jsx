@@ -22,7 +22,6 @@ const fadeUp = {
 const Footer = () => {
   return (
     <footer className="bg-dark text-white-50 py-5 position-relative overflow-hidden">
-      {/* subtle top glow line */}
       <motion.div
         style={{
           position: "absolute",
@@ -46,7 +45,6 @@ const Footer = () => {
         fluid="lg"
       >
         <div className="row g-4 align-items-center">
-          {/* LEFT */}
           <motion.div className="col-md-4" variants={fadeUp}>
             <h5 className="text-white fw-bold mb-3">TaskWise</h5>
             <p className="small mb-0">
@@ -55,7 +53,6 @@ const Footer = () => {
             </p>
           </motion.div>
 
-          {/* CENTER (new) */}
           <motion.div className="col-md-4 text-md-center" variants={fadeUp}>
             <div className="d-flex justify-content-center gap-3">
               {["bi-github", "bi-twitter-x", "bi-envelope"].map((icon, i) => (
@@ -70,7 +67,6 @@ const Footer = () => {
             </div>
           </motion.div>
 
-          {/* RIGHT */}
           <motion.div className="col-md-4 text-md-end" variants={fadeUp}>
             <p className="small mb-1">&copy; 2026 TaskWise</p>
             <p className="small mb-0 opacity-75">All rights reserved.</p>
