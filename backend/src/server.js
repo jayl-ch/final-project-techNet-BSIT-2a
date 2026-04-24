@@ -50,7 +50,7 @@ app.use(errorHandler);
 
 async function start() {
   const port = process.env.PORT;
-  const uri = process.env.MONGO_URI;
+  const uri = process.env.MONGO_URI_LOCAL;
 
   await connectDB(uri);
 
