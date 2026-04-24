@@ -10,7 +10,6 @@ import {
 const CTASection = () => {
   return (
     <section className="bg-primary text-white py-5 py-lg-6 position-relative overflow-hidden">
-      {/* subtle animated background glow */}
       <motion.div
         className="position-absolute top-50 start-50 translate-middle"
         style={{

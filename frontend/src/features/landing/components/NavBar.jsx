@@ -4,7 +4,7 @@ import { Navbar, Nav, Container } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import TaskWiseIcon from "../../../shared/ui/icon/TaskWiseIcon";
 
-const NAV_LINKS = ["Features", "Pricing"];
+const MotionDiv = motion.div;
 
 const NavBar = () => {
   const { scrollY } = useScroll();
@@ -18,7 +18,7 @@ const NavBar = () => {
   const close = () => setExpanded(false);
 
   return (
-    <motion.div
+    <MotionDiv
       className={`landing-nav fixed-top ${scrolled || expanded ? "bg-primary bg-opacity-75 shadow" : ""}`}
       style={{ backdropFilter: scrolled || expanded ? "blur(10px)" : "none" }}
       initial={{ y: -80, opacity: 0 }}
@@ -45,14 +45,6 @@ const NavBar = () => {
 
           {/* MOBILE: CTA + Toggler */}
           <div className="d-flex d-lg-none align-items-center gap-2">
-            <Nav.Link
-              as={Link}
-              to="/register"
-              onClick={close}
-              className="btn btn-primary btn-sm fw-semibold px-3"
-            >
-              Get started
-            </Nav.Link>
             <Navbar.Toggle
               aria-controls="main-nav"
               className="border-0 shadow-none"
@@ -96,7 +88,7 @@ const NavBar = () => {
           </Navbar.Collapse>
         </Container>
       </Navbar>
-    </motion.div>
+    </MotionDiv>
   );
 };
 
