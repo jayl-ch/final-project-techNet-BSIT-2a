@@ -1,0 +1,55 @@
+import { Navbar, Nav, Container } from "react-bootstrap";
+import { useTheme } from "../../../app/providers/theme";
+import { useTopbarData } from "../hooks/useTopbarData";
+import ThemeToggleButton from "./topbar/ThemeToggleButton";
+import NotificationsDropdown from "./topbar/NotificationsDropdown";
+import ProfileDropdown from "./topbar/ProfileDropdown";
+
+const Topbar = () => {
+  const { theme, toggleTheme } = useTheme();
+  const {
+    studentName,
+    studentEmail,
+    showProfileModal,
+    notifications,
+    unreadCount,
+    openProfileModal,
+    closeProfileModal,
+    handleSignOut,
+    handleSupport,
+    handleReadNotification,
+    handleMarkAllRead,
+  } = useTopbarData();
+
+  return (
+    <Navbar
+      className="topbar border-bottom d-none py-0 d-lg-flex position-fixed"
+      style={{ background: "var(--bs-body-bg)" }}
+    >
+      <Container fluid="lg">
+        <Nav className="d-flex align-items-center gap-2 ms-auto">
+          <ThemeToggleButton theme={theme} onToggleTheme={toggleTheme} />
+          <NotificationsDropdown
+            notifications={notifications}
+            unreadCount={unreadCount}
+            onMarkAllRead={handleMarkAllRead}
+            onReadNotification={handleReadNotification}
+          />
+          <ProfileDropdown
+            theme={theme}
+            studentName={studentName}
+            studentEmail={studentEmail}
+            showProfileModal={showProfileModal}
+            onOpenProfile={openProfileModal}
+            onCloseProfile={closeProfileModal}
+            onToggleTheme={toggleTheme}
+            onSupport={handleSupport}
+            onSignOut={handleSignOut}
+          />
+        </Nav>
+      </Container>
+    </Navbar>
+  );
+};
+
+export default Topbar;
