@@ -1,0 +1,49 @@
+/* Override Bootstrap Dark Theme */
+[data-bs-theme="dark"] {
+  /* Backgrounds */
+  --bs-body-bg: #0b0f19;
+  --bs-body-color: #e6e9ef;
+
+  --bs-secondary-bg: #121826;
+  --bs-tertiary-bg: #1a2233;
+
+  /* Borders */
+  --bs-border-color: #2a3447;
+
+  /* Text */
+  --bs-secondary-color: #9aa4b2;
+  --bs-heading-color: #ffffff;
+
+  /* Primary (your blue theme) */
+  /* --bs-primary: #4f8cff; */
+  /* --bs-primary-rgb: 79, 140, 255; */
+
+  /* Links */
+  --bs-link-color: #6ea8ff;
+  --bs-link-hover-color: #9ec5ff;
+
+  /* Cards */
+  --bs-card-bg: rgba(18, 24, 38, 0.85);
+  --bs-card-border-color: #2a3447;
+
+  /* Inputs */
+  --bs-input-bg: #0f1525;
+  --bs-input-border-color: #2a3447;
+  --bs-input-color: #e6e9ef;
+
+  /* Buttons */
+  /* --bs-btn-bg: #4f8cff; */
+  /* --bs-btn-border-color: #4f8cff; */
+  /* --bs-btn-hover-bg: #3f7cff; */
+  /* --bs-btn-hover-border-color: #3f7cff; */
+}
+
+[data-bs-theme="dark"] .card:not(.bg-light) {
+  backdrop-filter: blur(10px);
+  background-color: rgba(18, 24, 38, 0.85) !important;
+  border: 1px solid var(--bs-border-color);
+}
+[data-bs-theme="dark"] .navbar:not(.landing-navbar) {
+  backdrop-filter: blur(12px);
+  background-color: rgba(11, 15, 25, 0.8) !important;
+}

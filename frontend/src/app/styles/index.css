@@ -4,3 +4,4 @@
 @import "../../features/layout/styles/sidebar.css";
 @import "../../features/dashboard/styles/dashboard.css";
 @import "../../features/auth/styles/auth.css";
+@import "./theme.css";
