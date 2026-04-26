@@ -1,0 +1,129 @@
+:root {
+  --gr-surface: color-mix(in srgb, var(--bs-body-bg) 80%, #ffffff 20%);
+  --gr-border: color-mix(in srgb, var(--bs-border-color) 65%, transparent);
+}
+
+.groups-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.groups-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(47, 107, 255, 0.15), transparent 34%),
+    radial-gradient(circle at 88% 14%, rgba(32, 178, 107, 0.12), transparent 30%);
+}
+
+.groups-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.6rem 1.75rem;
+  border-radius: 1.5rem;
+  color: #f8fbff;
+  background:
+    linear-gradient(130deg, #1b4ce6, #0c7b98 55%, #15a07e 100%),
+    repeating-linear-gradient(
+      125deg,
+      rgba(255, 255, 255, 0.1) 0,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px,
+      transparent 14px
+    );
+  background-blend-mode: soft-light;
+  box-shadow: 0 18px 38px rgba(8, 32, 57, 0.24);
+}
+
+.groups-date {
+  font-size: 0.8rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.groups-title {
+  font-size: clamp(1.65rem, 2.5vw, 2.3rem);
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.groups-subtitle {
+  max-width: 56ch;
+  opacity: 0.92;
+}
+
+.groups-list-card {
+  background: color-mix(in srgb, var(--gr-surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 34px rgba(8, 22, 45, 0.12);
+}
+
+.groups-list-header {
+  border-bottom: 1px solid var(--gr-border) !important;
+  background: transparent;
+}
+
+.groups-list-items {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.group-item {
+  border: 1px solid var(--gr-border);
+  background: color-mix(in srgb, var(--bs-body-bg) 85%, #ffffff 15%);
+  transition:
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.group-item:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--bs-primary) 45%, var(--gr-border));
+}
+
+.group-item-active {
+  border-color: color-mix(in srgb, var(--bs-primary) 58%, var(--gr-border));
+  box-shadow: 0 10px 22px rgba(20, 50, 100, 0.12);
+}
+
+.groups-empty {
+  border: 1px dashed var(--gr-border);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--bs-tertiary-bg) 75%, transparent);
+}
+
+.group-assignment-box {
+  background: color-mix(in srgb, var(--bs-primary) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--bs-primary) 20%, var(--gr-border));
+}
+
+.groups-members-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 0.85rem;
+}
+
+.group-member-card {
+  border: 1px solid var(--gr-border);
+  background: color-mix(in srgb, var(--bs-body-bg) 86%, #ffffff 14%);
+}
+
+.member-task-item {
+  border: 1px solid color-mix(in srgb, var(--bs-border-color) 70%, transparent);
+  background: color-mix(in srgb, var(--bs-body-bg) 90%, #ffffff 10%);
+}
+
+@media (max-width: 768px) {
+  .groups-hero {
+    border-radius: 1.1rem;
+    padding: 1.2rem;
+  }
+}
