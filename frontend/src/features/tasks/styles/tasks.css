@@ -1,0 +1,287 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
+:root {
+  --tk-surface: color-mix(in srgb, var(--bs-body-bg) 78%, #ffffff 22%);
+  --tk-surface-2: color-mix(in srgb, var(--bs-body-bg) 86%, #ffffff 14%);
+  --tk-border-soft: color-mix(in srgb, var(--bs-border-color) 65%, transparent);
+  --tk-accent-blue: #2f6bff;
+  --tk-accent-cyan: #09a9c8;
+  --tk-accent-green: #1fa971;
+  --tk-accent-orange: #ff8b1f;
+  --tk-accent-red: #eb4d5c;
+}
+
+.tasks-shell {
+  position: relative;
+  isolation: isolate;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.tasks-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      circle at 10% 18%,
+      rgba(9, 169, 200, 0.17),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 88% 12%,
+      rgba(47, 107, 255, 0.16),
+      transparent 32%
+    ),
+    radial-gradient(
+      circle at 84% 84%,
+      rgba(31, 169, 113, 0.15),
+      transparent 30%
+    );
+}
+
+.tasks-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.6rem 1.75rem;
+  border-radius: 1.5rem;
+  color: #f8fbff;
+  background:
+    linear-gradient(130deg, #0b5dd6, #0f7abf 46%, #13a193 100%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.11) 0,
+      rgba(255, 255, 255, 0.11) 1px,
+      transparent 1px,
+      transparent 16px
+    );
+  background-blend-mode: soft-light;
+  box-shadow: 0 20px 42px rgba(8, 32, 57, 0.26);
+}
+
+.tasks-hero-date {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  opacity: 0.86;
+}
+
+.tasks-hero-title {
+  font-family: "Space Grotesk", "Manrope", sans-serif;
+  font-size: clamp(1.7rem, 2.5vw, 2.3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.tasks-hero-subtitle {
+  max-width: 58ch;
+  opacity: 0.92;
+}
+
+.tasks-stat-card,
+.tasks-side-card,
+.tasks-list-card {
+  background: color-mix(in srgb, var(--tk-surface) 93%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 34px rgba(8, 22, 45, 0.13);
+}
+
+.tasks-stat-card {
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease;
+}
+
+.tasks-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 35px rgba(8, 22, 45, 0.16);
+}
+
+.tasks-stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bs-secondary-color);
+  font-weight: 700;
+}
+
+.tasks-stat-value {
+  font-size: clamp(1.5rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.tasks-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.7rem;
+  height: 2.7rem;
+  border-radius: 0.9rem;
+  font-size: 1.35rem;
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+
+.tasks-list-header,
+.tasks-side-head {
+  border-bottom: 1px solid var(--tk-border-soft) !important;
+  background: transparent;
+}
+
+.tasks-count-badge {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.tasks-controls {
+  display: grid;
+  gap: 0.75rem;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+}
+
+.tasks-search-wrap,
+.tasks-select {
+  min-height: 2.8rem;
+}
+
+.tasks-search-icon {
+  border-color: var(--tk-border-soft);
+  background: color-mix(in srgb, var(--tk-surface-2) 82%, transparent);
+}
+
+.tasks-search-input,
+.tasks-select {
+  border-color: var(--tk-border-soft);
+  background: color-mix(in srgb, var(--tk-surface-2) 92%, transparent);
+}
+
+.tasks-search-input:focus,
+.tasks-select:focus {
+  border-color: color-mix(in srgb, var(--tk-accent-blue) 65%, transparent);
+  box-shadow: 0 0 0 0.24rem
+    color-mix(in srgb, var(--tk-accent-blue) 20%, transparent);
+}
+
+.tasks-list-items {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.tasks-item {
+  border-left: 4px solid transparent;
+  border-radius: 1rem;
+  border: 1px solid var(--tk-border-soft);
+  padding: 1rem 1rem 0.95rem;
+  background: color-mix(in srgb, var(--bs-body-bg) 84%, #ffffff 16%);
+  transition:
+    transform 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.tasks-item:hover {
+  transform: translateX(4px);
+  border-color: color-mix(
+    in srgb,
+    var(--tk-accent-cyan) 38%,
+    var(--tk-border-soft)
+  );
+  background: color-mix(in srgb, var(--bs-body-bg) 80%, #ffffff 20%);
+}
+
+.tasks-item-title {
+  font-size: 1.03rem;
+}
+
+.tasks-item-course,
+.tasks-item-meta {
+  color: var(--bs-secondary-color);
+}
+
+.tasks-item-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.88rem;
+}
+
+.tasks-priority-badge {
+  border: 1px solid currentColor;
+  border-radius: var(--bs-border-radius-pill);
+  font-size: var(--bs-badge-font-size);
+  font-weight: var(--bs-badge-font-weight);
+}
+
+.tasks-item-progress .progress-bar,
+.tasks-progress .progress-bar {
+  background: linear-gradient(
+    90deg,
+    var(--tk-accent-blue),
+    var(--tk-accent-cyan)
+  );
+}
+
+.tasks-focus-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: var(--tk-accent-blue);
+  border-radius: 999px;
+  padding: 0.48rem 0.85rem;
+  background: color-mix(in srgb, var(--tk-accent-blue) 12%, transparent);
+}
+
+.tasks-milestone-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.9rem;
+  align-items: flex-start;
+  padding: 0.85rem 0;
+  border-bottom: 1px dashed var(--tk-border-soft);
+}
+
+.tasks-milestone-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.tasks-milestone-title {
+  font-size: 0.95rem;
+}
+
+.tasks-empty-state {
+  border: 1px dashed var(--tk-border-soft);
+  border-radius: 1rem;
+  background: color-mix(in srgb, var(--tk-surface-2) 82%, transparent);
+}
+
+@media (max-width: 992px) {
+  .tasks-hero {
+    padding: 1.25rem;
+    border-radius: 1.1rem;
+  }
+
+  .tasks-controls {
+    grid-template-columns: 1fr;
+  }
+
+  .tasks-select {
+    width: 100%;
+  }
+}
+
+@media (max-width: 576px) {
+  .tasks-item {
+    padding: 0.9rem;
+  }
+
+  .tasks-item-meta {
+    gap: 0.7rem;
+  }
+}
