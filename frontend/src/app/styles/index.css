@@ -5,4 +5,5 @@
 @import "../../features/dashboard/styles/dashboard.css";
 @import "../../features/auth/styles/auth.css";
 @import "../../features/tasks/styles/tasks.css";
+@import "../../features/groups/styles/groups.css";
 @import "./theme.css";
