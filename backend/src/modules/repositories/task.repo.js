@@ -15,6 +15,10 @@ const findByIdAndCreator = async (_id, creator) => {
   return await Task.findOne({ _id, creator });
 };
 
+const findById = async (_id) => {
+  return await Task.findById(_id);
+};
+
 const updateById = async (taskId, task) => {
   return await Task.findByIdAndUpdate(
     taskId,
@@ -31,6 +35,7 @@ module.exports = {
   findByCreator,
   create,
   findByIdAndCreator,
+  findById,
   updateById,
   deleteById,
 };
