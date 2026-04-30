@@ -4,6 +4,14 @@ const existsByTaskUserGroup = async (taskId, assignedTo, groupId) => {
   return await TaskAssignment.findOne({ taskId, assignedTo, groupId });
 };
 
+const existsByTaskAndUser = async (taskId, assignedTo) => {
+  return await TaskAssignment.findOne({ taskId, assignedTo });
+};
+
+const findAssignedTasksByStudent = async (assignedTo) => {
+  return await TaskAssignment.find({ assignedTo }).populate("taskId");
+};
+
 const createTaskAssignment = async (taskId, assignedTo, groupId) => {
   return await TaskAssignment.create({ taskId, assignedTo, groupId });
 };
@@ -24,6 +32,8 @@ const deleteByGroupAndStudent = async (groupId, assignedTo) => {
 
 module.exports = {
   existsByTaskUserGroup,
+  existsByTaskAndUser,
+  findAssignedTasksByStudent,
   createTaskAssignment,
   findByGroupIdWithTaskAndStudent,
   deleteByGroupId,
