@@ -19,14 +19,18 @@ const GroupList = ({
           </p>
         </div>
         <Badge bg="primary" pill className="px-3 py-2">
-          {groups.length} groups
+          {groups.length} {groups.length === 1 ? "group" : "groups"}
         </Badge>
       </Card.Header>
 
       <Card.Body className="p-3 p-xl-4">
         {loading ? (
           <div className="text-center py-5 text-secondary">
-            <span className="spinner-border spinner-border-sm me-2" />
+            <div
+              className="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            />
             Loading groups...
           </div>
         ) : error ? (
@@ -63,27 +67,51 @@ const GroupList = ({
                 }}
               >
                 <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-                  <div>
-                    <h5 className="fw-bold mb-1">{group.name}</h5>
-                    <p className="text-secondary mb-0">Invite code: {group.inviteCode}</p>
+                  <div className="d-flex align-items-center gap-3">
+                    {/* Avatar circle with group initial */}
+                    <div
+                      className="group-avatar rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                      aria-hidden="true"
+                    >
+                      <span className="fw-bold">
+                        {group.name?.charAt(0)?.toUpperCase() ?? "G"}
+                      </span>
+                    </div>
+                    <div>
+                      <h5 className="fw-bold mb-1">{group.name}</h5>
+                      <p className="text-secondary mb-0 small">
+                        <i className="bi bi-key me-1" />
+                        {group.inviteCode}
+                      </p>
+                    </div>
                   </div>
-                  <div className="d-flex align-items-center gap-2">
-                    <Badge bg="info" pill>
-                      {group.membersCount} members
+
+                  <div className="d-flex align-items-center gap-2 flex-wrap">
+                    <Badge bg="info" pill className="px-3">
+                      <i className="bi bi-people-fill me-1" />
+                      {group.membersCount}{" "}
+                      {group.membersCount === 1 ? "member" : "members"}
                     </Badge>
+
                     {group.isOwner ? (
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
-                        className="rounded-pill"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onDelete?.(group.id);
-                        }}
-                      >
-                        <i className="bi bi-trash3 me-1" />
-                        Delete
-                      </Button>
+                      <>
+                        <Badge bg="success" pill className="px-3">
+                          <i className="bi bi-star-fill me-1" />
+                          Owner
+                        </Badge>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          className="rounded-pill"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onDelete?.(group);
+                          }}
+                        >
+                          <i className="bi bi-trash3 me-1" />
+                          Delete
+                        </Button>
+                      </>
                     ) : (
                       <Button
                         variant="outline-secondary"
@@ -91,7 +119,7 @@ const GroupList = ({
                         className="rounded-pill"
                         onClick={(event) => {
                           event.stopPropagation();
-                          onDelete?.(group.id);
+                          onDelete?.(group);
                         }}
                       >
                         <i className="bi bi-box-arrow-right me-1" />
