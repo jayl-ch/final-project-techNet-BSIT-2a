@@ -1,23 +1,16 @@
 import { useCallback, useState } from "react";
-import {
-  Row,
-  Col,
-  Card,
-  ProgressBar,
-  Badge,
-  Button,
-  Form,
-  Modal,
-  Alert,
-  Spinner,
-} from "react-bootstrap";
+import { Alert, Col, Row } from "react-bootstrap";
 import { motion, useReducedMotion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import TaskList from "../components/TaskList";
+import TaskFormModal from "../components/TaskFormModal";
+import TasksHero from "../components/TasksHero";
+import TasksSidebar from "../components/TasksSidebar";
+import TasksStatsGrid from "../components/TasksStatsGrid";
+import ConfirmActionModal from "../../../shared/ui/ConfirmActionModal";
 import { useTasksData } from "../hooks/useTasksData";
 
 const MotionDiv = motion.div;
-const MotionSection = motion.section;
 
 const initialForm = {
   name: "",
@@ -79,13 +72,17 @@ const Tasks = () => {
   }, [navigate]);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [formValues, setFormValues] = useState(initialForm);
   const [editValues, setEditValues] = useState(initialForm);
   const [saving, setSaving] = useState(false);
   const [editSaving, setEditSaving] = useState(false);
+  const [deleteSaving, setDeleteSaving] = useState(false);
   const [saveError, setSaveError] = useState("");
   const [editError, setEditError] = useState("");
+  const [deleteError, setDeleteError] = useState("");
 
   const {
     loading,
@@ -175,6 +172,22 @@ const Tasks = () => {
     setEditError("");
   };
 
+  const handleOpenDelete = (task) => {
+    if (!task) {
+      return;
+    }
+
+    setDeleteTarget({ id: task.id, title: task.title });
+    setDeleteError("");
+    setShowDeleteModal(true);
+  };
+
+  const handleCloseDelete = () => {
+    setShowDeleteModal(false);
+    setDeleteTarget(null);
+    setDeleteError("");
+  };
+
   const handleEditTask = async (event) => {
     event.preventDefault();
 
@@ -195,6 +208,24 @@ const Tasks = () => {
     }
   };
 
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) {
+      return;
+    }
+
+    setDeleteSaving(true);
+    setDeleteError("");
+
+    try {
+      await removeTask(deleteTarget.id);
+      handleCloseDelete();
+    } catch (err) {
+      setDeleteError(err?.response?.data?.message || "Failed to delete task.");
+    } finally {
+      setDeleteSaving(false);
+    }
+  };
+
   return (
     <MotionDiv
       className="tasks tasks-shell"
@@ -202,29 +233,11 @@ const Tasks = () => {
       initial={prefersReducedMotion ? false : "hidden"}
       animate={prefersReducedMotion ? undefined : "visible"}
     >
-      <MotionSection
-        className="tasks-hero mb-4 mb-xl-5"
-        variants={prefersReducedMotion ? undefined : itemVariants}
-      >
-        <div>
-          <p className="tasks-hero-date mb-2">{today}</p>
-          <h1 className="tasks-hero-title mb-2">Task Studio</h1>
-          <p className="tasks-hero-subtitle mb-0">
-            Organize deadlines, focus on urgent work, and keep your day moving
-            with clarity.
-          </p>
-        </div>
-        <div className="d-flex flex-wrap gap-2">
-          <Button
-            variant="light"
-            className="rounded-pill px-4 fw-semibold"
-            onClick={handleOpenCreate}
-          >
-            <i className="bi bi-plus-lg me-2"></i>
-            New Task
-          </Button>
-        </div>
-      </MotionSection>
+      <TasksHero
+        dateLabel={today}
+        onCreate={handleOpenCreate}
+        motionVariants={prefersReducedMotion ? undefined : itemVariants}
+      />
 
       {error && (
         <Alert variant="danger" className="mb-4">
@@ -232,29 +245,10 @@ const Tasks = () => {
         </Alert>
       )}
 
-      <Row className="g-3 g-xl-4 mb-4 mb-xl-5">
-        {stats.map((item) => (
-          <Col key={item.id} xl={3} lg={6} md={6} sm={12}>
-            <MotionDiv variants={prefersReducedMotion ? undefined : itemVariants}>
-              <Card className="tasks-stat-card border-0 rounded-4">
-                <Card.Body className="p-4">
-                  <div className="d-flex justify-content-between align-items-start mb-3">
-                    <span className="tasks-stat-label">{item.label}</span>
-                    <span
-                      className="tasks-stat-icon"
-                      style={{ color: item.accent }}
-                      aria-hidden="true"
-                    >
-                      <i className={`bi bi-${item.icon}`}></i>
-                    </span>
-                  </div>
-                  <div className="tasks-stat-value">{item.value}</div>
-                </Card.Body>
-              </Card>
-            </MotionDiv>
-          </Col>
-        ))}
-      </Row>
+      <TasksStatsGrid
+        stats={stats}
+        motionVariants={prefersReducedMotion ? undefined : itemVariants}
+      />
 
       <Row className="g-4 align-items-start">
         <Col xl={8}>
@@ -271,247 +265,64 @@ const Tasks = () => {
               onEdit={handleOpenEdit}
               onComplete={completeTask}
               onCycleStatus={cycleTaskStatus}
-              onDelete={removeTask}
+              onDelete={handleOpenDelete}
             />
           </MotionDiv>
         </Col>
 
-        <Col xl={4}>
-          <MotionDiv variants={prefersReducedMotion ? undefined : itemVariants}>
-            <Card className="tasks-side-card border-0 rounded-4 mb-4">
-              <Card.Header className="tasks-side-head border-0 p-4 pb-2">
-                <Card.Title className="fw-bold mb-1">Daily Velocity</Card.Title>
-                <p className="small text-secondary mb-0">
-                  Stay above 80% completion for your current sprint.
-                </p>
-              </Card.Header>
-              <Card.Body className="p-4 pt-3">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="small text-secondary">Completion Score</span>
-                  <span className="fw-bold">{completion}%</span>
-                </div>
-                <ProgressBar
-                  now={completion}
-                  className="tasks-progress"
-                  style={{ height: "0.65rem" }}
-                />
-                <div className="tasks-focus-chip mt-4">
-                  <i className="bi bi-stars"></i>
-                  {stats.find((item) => item.id === "overdue")?.value || 0} tasks need
-                  urgent focus
-                </div>
-              </Card.Body>
-            </Card>
-          </MotionDiv>
-
-          <MotionDiv variants={prefersReducedMotion ? undefined : itemVariants}>
-            <Card className="tasks-side-card border-0 rounded-4">
-              <Card.Header className="tasks-side-head border-0 p-4 pb-2 d-flex justify-content-between align-items-center">
-                <Card.Title className="fw-bold mb-0">Upcoming Milestones</Card.Title>
-                <Badge bg="secondary" pill>
-                  {upcomingMilestones.length}
-                </Badge>
-              </Card.Header>
-              <Card.Body className="p-4 pt-2">
-                {upcomingMilestones.length === 0 ? (
-                  <p className="small text-secondary mb-0">No upcoming active tasks.</p>
-                ) : (
-                  upcomingMilestones.map((item) => (
-                    <div key={item.id} className="tasks-milestone-item">
-                      <div>
-                        <p className="fw-semibold mb-1 tasks-milestone-title">{item.title}</p>
-                        <p className="small text-secondary mb-0">
-                          <i className="bi bi-calendar3 me-1"></i>
-                          {item.due}
-                        </p>
-                      </div>
-                      <Badge bg={item.variant} className="rounded-pill px-3 py-2">
-                        {item.type}
-                      </Badge>
-                    </div>
-                  ))
-                )}
-              </Card.Body>
-            </Card>
-          </MotionDiv>
-        </Col>
+        <TasksSidebar
+          completion={completion}
+          stats={stats}
+          upcomingMilestones={upcomingMilestones}
+          motionVariants={prefersReducedMotion ? undefined : itemVariants}
+        />
       </Row>
 
-      <Modal show={showCreateModal} onHide={handleCloseCreate} centered>
-        <Form onSubmit={handleCreateTask}>
-          <Modal.Header closeButton>
-            <Modal.Title>Create Task</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {saveError && <Alert variant="danger">{saveError}</Alert>}
+      <TaskFormModal
+        show={showCreateModal}
+        title="Create Task"
+        submitLabel="Create Task"
+        loadingLabel="Creating..."
+        onClose={handleCloseCreate}
+        onSubmit={handleCreateTask}
+        values={formValues}
+        onChange={handleChangeForm}
+        saving={saving}
+        error={saveError}
+        idPrefix="task"
+      />
 
-            <Form.Group className="mb-3" controlId="task-name">
-              <Form.Label>Task Name</Form.Label>
-              <Form.Control
-                name="name"
-                maxLength={20}
-                required
-                value={formValues.name}
-                onChange={handleChangeForm}
-                placeholder="Task title"
-              />
-            </Form.Group>
+      <TaskFormModal
+        show={showEditModal}
+        title="Edit Task"
+        submitLabel="Save Changes"
+        loadingLabel="Saving..."
+        onClose={handleCloseEdit}
+        onSubmit={handleEditTask}
+        values={editValues}
+        onChange={handleChangeEditForm}
+        saving={editSaving}
+        error={editError}
+        idPrefix="task-edit"
+      />
 
-            <Form.Group className="mb-3" controlId="task-subject">
-              <Form.Label>Subject</Form.Label>
-              <Form.Control
-                name="subject"
-                maxLength={20}
-                value={formValues.subject}
-                onChange={handleChangeForm}
-                placeholder="Subject or category"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="task-difficulty">
-              <Form.Label>Difficulty (1 to 5)</Form.Label>
-              <Form.Select
-                name="difficulty"
-                value={formValues.difficulty}
-                onChange={handleChangeForm}
-              >
-                <option value={1}>1 - Easiest</option>
-                <option value={2}>2</option>
-                <option value={3}>3 - Medium</option>
-                <option value={4}>4</option>
-                <option value={5}>5 - Hardest</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="task-deadline">
-              <Form.Label>Deadline</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                name="deadline"
-                required
-                value={formValues.deadline}
-                onChange={handleChangeForm}
-              />
-            </Form.Group>
-
-            <Form.Group controlId="task-status">
-              <Form.Label>Status</Form.Label>
-              <Form.Select
-                name="status"
-                value={formValues.status}
-                onChange={handleChangeForm}
-              >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={handleCloseCreate}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" disabled={saving}>
-              {saving ? (
-                <>
-                  <Spinner size="sm" className="me-2" />
-                  Creating...
-                </>
-              ) : (
-                "Create Task"
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      <Modal show={showEditModal} onHide={handleCloseEdit} centered>
-        <Form onSubmit={handleEditTask}>
-          <Modal.Header closeButton>
-            <Modal.Title>Edit Task</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {editError && <Alert variant="danger">{editError}</Alert>}
-
-            <Form.Group className="mb-3" controlId="task-edit-name">
-              <Form.Label>Task Name</Form.Label>
-              <Form.Control
-                name="name"
-                maxLength={20}
-                required
-                value={editValues.name}
-                onChange={handleChangeEditForm}
-                placeholder="Task title"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="task-edit-subject">
-              <Form.Label>Subject</Form.Label>
-              <Form.Control
-                name="subject"
-                maxLength={20}
-                value={editValues.subject}
-                onChange={handleChangeEditForm}
-                placeholder="Subject or category"
-              />
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="task-edit-difficulty">
-              <Form.Label>Difficulty (1 to 5)</Form.Label>
-              <Form.Select
-                name="difficulty"
-                value={editValues.difficulty}
-                onChange={handleChangeEditForm}
-              >
-                <option value={1}>1 - Easiest</option>
-                <option value={2}>2</option>
-                <option value={3}>3 - Medium</option>
-                <option value={4}>4</option>
-                <option value={5}>5 - Hardest</option>
-              </Form.Select>
-            </Form.Group>
-
-            <Form.Group className="mb-3" controlId="task-edit-deadline">
-              <Form.Label>Deadline</Form.Label>
-              <Form.Control
-                type="datetime-local"
-                name="deadline"
-                required
-                value={editValues.deadline}
-                onChange={handleChangeEditForm}
-              />
-            </Form.Group>
-
-            <Form.Group controlId="task-edit-status">
-              <Form.Label>Status</Form.Label>
-              <Form.Select
-                name="status"
-                value={editValues.status}
-                onChange={handleChangeEditForm}
-              >
-                <option value="pending">Pending</option>
-                <option value="in-progress">In Progress</option>
-                <option value="completed">Completed</option>
-              </Form.Select>
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="outline-secondary" onClick={handleCloseEdit}>
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" disabled={editSaving}>
-              {editSaving ? (
-                <>
-                  <Spinner size="sm" className="me-2" />
-                  Saving...
-                </>
-              ) : (
-                "Save Changes"
-              )}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
+      <ConfirmActionModal
+        show={showDeleteModal}
+        title="Delete task?"
+        message={
+          <>
+            Delete <strong>{deleteTarget?.title || "this task"}</strong>? This
+            action cannot be undone.
+          </>
+        }
+        confirmLabel="Delete task"
+        loadingLabel="Deleting..."
+        loading={deleteSaving}
+        error={deleteError}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCloseDelete}
+        onDismissError={() => setDeleteError("")}
+      />
     </MotionDiv>
   );
 };
