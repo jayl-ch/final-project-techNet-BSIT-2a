@@ -14,7 +14,7 @@ const ProtectedRoute = ({ children }) => {
         if (mounted) {
           setStatus("authenticated");
         }
-      } catch (error) {
+      } catch {
         if (mounted) {
           setStatus("unauthenticated");
         }
