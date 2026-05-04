@@ -7,7 +7,9 @@ const SidebarItem = ({ icon, label, path = "", onClick }) => {
       onClick={onClick}
       className={({ isActive }) => "sidebar-item " + (isActive ? "active" : "")}
     >
-      <i className={`bi bi-${icon}`} style={{ fontSize: "16px" }}></i>
+      <span className="sidebar-item-icon" aria-hidden="true">
+        <i className={`bi bi-${icon}`}></i>
+      </span>
       <span>{label}</span>
     </NavLink>
   );

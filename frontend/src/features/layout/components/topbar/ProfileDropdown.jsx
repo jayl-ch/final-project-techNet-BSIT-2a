@@ -25,8 +25,8 @@ const ProfileDropdown = ({
             {studentName}
           </Dropdown.Toggle>
 
-          <Dropdown.Menu>
-            <Dropdown.Item onClick={onOpenProfile}>View account</Dropdown.Item>
+          <Dropdown.Menu align="end">
+            <Dropdown.Item onClick={onOpenProfile}>Edit Profile</Dropdown.Item>
             <Dropdown.Item onClick={onToggleTheme}>
               Switch to {theme === "dark" ? "light" : "dark"} mode
             </Dropdown.Item>
