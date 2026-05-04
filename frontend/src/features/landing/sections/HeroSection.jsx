@@ -65,7 +65,7 @@ const HeroSection = () => {
         as={motion.div}
         variants={container}
         initial="hidden"
-        animate="show"d
+        animate="show"
         className="position-relative"
         style={{ zIndex: 1 }}
       >

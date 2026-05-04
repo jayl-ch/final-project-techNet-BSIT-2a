@@ -11,7 +11,9 @@ import {
   leaveGroup,
   removeGroupMember,
   removeGroup,
+  updateAssignedTaskStatus,
 } from "../api/groupsApi";
+import { apiClient } from "../../auth/api/authApi";
 
 const toGroupItem = (group) => ({
   id: group._id,
@@ -34,14 +36,24 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [detailsError, setDetailsError] = useState("");
   const [assignableTasks, setAssignableTasks] = useState([]);
+  const [currentStudentId, setCurrentStudentId] = useState(null);
 
   const loadGroups = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const result = await fetchGroups();
-      setGroups(Array.isArray(result) ? result : []);
+      const [groupsResult, studentResult] = await Promise.allSettled([
+        fetchGroups(),
+        apiClient.get("/api/student")
+      ]);
+
+      if (groupsResult.status === "rejected") throw groupsResult.reason;
+      setGroups(Array.isArray(groupsResult.value) ? groupsResult.value : []);
+
+      if (studentResult.status === "fulfilled") {
+        setCurrentStudentId(studentResult.value?.data?.student?._id || null);
+      }
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         clearAuthToken();
@@ -150,6 +162,11 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
     await loadGroupDetails();
   }, [loadGroupDetails, selectedGroupId]);
 
+  const updateMemberTaskStatus = useCallback(async (taskId, status) => {
+    await updateAssignedTaskStatus(taskId, status);
+    await loadGroupDetails();
+  }, [loadGroupDetails]);
+
   return {
     groups: groupItems,
     loading,
@@ -160,6 +177,7 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
     detailsLoading,
     detailsError,
     assignableTasks,
+    currentStudentId,
     reloadDetails: loadGroupDetails,
     addGroup,
     joinExistingGroup,
@@ -167,5 +185,6 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
     leaveSelectedGroup,
     removeMemberFromGroup,
     assignTask,
+    updateMemberTaskStatus,
   };
 };

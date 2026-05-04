@@ -15,8 +15,16 @@
   z-index: -1;
   pointer-events: none;
   background:
-    radial-gradient(circle at 12% 18%, rgba(47, 107, 255, 0.15), transparent 34%),
-    radial-gradient(circle at 88% 14%, rgba(32, 178, 107, 0.12), transparent 30%);
+    radial-gradient(
+      circle at 12% 18%,
+      rgba(47, 107, 255, 0.15),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 88% 14%,
+      rgba(32, 178, 107, 0.12),
+      transparent 30%
+    );
 }
 
 .groups-hero {
@@ -107,7 +115,7 @@
 
 .groups-members-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
   gap: 0.85rem;
 }
 
@@ -119,6 +127,13 @@
 .member-task-item {
   border: 1px solid color-mix(in srgb, var(--bs-border-color) 70%, transparent);
   background: color-mix(in srgb, var(--bs-body-bg) 90%, #ffffff 10%);
+}
+
+.member-avatar {
+  background: linear-gradient(135deg, var(--pf-accent), var(--pf-accent-2));
+  height: 2rem;
+  width: 2rem;
+  color: #fff;
 }
 
 @media (max-width: 768px) {

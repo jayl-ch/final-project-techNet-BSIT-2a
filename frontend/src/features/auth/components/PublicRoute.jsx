@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getAuthStudent } from "../api/authApi";
 
-const ProtectedRoute = ({ children }) => {
+const PublicRoute = ({ children, redirectTo = "/dashboard" }) => {
   const [status, setStatus] = useState("checking");
 
   useEffect(() => {
@@ -32,11 +32,11 @@ const ProtectedRoute = ({ children }) => {
     return null;
   }
 
-  if (status !== "authenticated") {
-    return <Navigate to="/login" replace />;
+  if (status === "authenticated") {
+    return <Navigate to={redirectTo} replace />;
   }
 
   return children;
 };
 
-export default ProtectedRoute;
+export default PublicRoute;

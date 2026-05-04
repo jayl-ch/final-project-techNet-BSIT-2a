@@ -1,105 +1,99 @@
-import { Navbar, Nav, Container } from "react-bootstrap";
+import { Nav, Offcanvas } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import SidebarItem from "./SidebarItem";
 import TaskWiseIcon from "../../../shared/ui/icon/TaskWiseIcon";
 import { authLogoutStudent } from "../../auth/api/authApi";
 
-const Sidebar = () => {
+const navItems = [
+  {
+    name: "Dashboard",
+    path: "/dashboard",
+    icon: "house-door",
+  },
+  {
+    name: "Tasks",
+    path: "/tasks",
+    icon: "check2-square",
+  },
+  {
+    name: "Groups",
+    path: "/groups",
+    icon: "people",
+  },
+  {
+    name: "Profile",
+    path: "/profile",
+    icon: "person",
+  },
+];
+
+const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
   const handleLogout = async () => {
     await authLogoutStudent();
+    onClose();
   };
 
-  const navItem = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-    },
-    {
-      name: "Tasks",
-      path: "/tasks",
-    },
-    {
-      name: "Groups",
-      path: "/groups",
-    },
-    {
-      name: "Profile",
-      path: "/profile",
-    },
-  ];
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="sidebar border-end d-none d-lg-flex flex-column z-2">
-        <div
-          style={{
-            padding: "20px",
-            fontSize: "20px",
-            fontWeight: "bold",
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-          }}
-        >
-          <TaskWiseIcon />
-          <span>TaskWise</span>
+      <aside className="sidebar d-none d-lg-flex flex-column">
+        <div className="sidebar-header">
+          <Link className="sidebar-brand" to="/dashboard">
+            <TaskWiseIcon size={34} />
+            <span>TaskWise</span>
+          </Link>
         </div>
 
-        <nav
-          className="pt-2 d-flex flex-column justify-content-between"
-          style={{ height: "calc(100vh - 4.5rem)" }}
-        >
-          <div>
-            <SidebarItem
-              path="/dashboard"
-              icon="house-door"
-              label="Dashboard"
-              active
-            />
-            <SidebarItem path="/tasks" icon="check2-square" label="Tasks" />
-            <SidebarItem path="/groups" icon="people" label="Groups" />
-            <SidebarItem path="/profile" icon="person" label="Profile" />
-            <hr
-              style={{
-                borderColor: "rgba(255,255,255,0.2)",
-                margin: "8px 16px",
-              }}
-            />
-            <SidebarItem
-              path="/login"
-              icon="box-arrow-right"
-              label="Logout"
-              onClick={handleLogout}
-            />
+        <nav className="sidebar-nav">
+          <div className="sidebar-nav-section">
+            {navItems.map((item) => (
+              <SidebarItem
+                key={item.path}
+                path={item.path}
+                icon={item.icon}
+                label={item.name}
+              />
+            ))}
           </div>
         </nav>
       </aside>
 
-      {/* Mobile Navbar */}
-      <Navbar
-        bg="dark"
-        variant="dark"
-        expand={false}
-        className="d-lg-none w-100 position-fixed top-0"
-        style={{ zIndex: 1000 }}
+      {/* Mobile Offcanvas */}
+      <Offcanvas
+        show={isOpen}
+        onHide={onClose}
+        placement="start"
+        className="sidebar-offcanvas d-lg-none"
       >
-        <Container fluid="md">
-          <Navbar.Brand className="ms-2">
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title className="sidebar-brand">
             <TaskWiseIcon size={30} />
-            <span className="ms-2">TaskWise</span>
-          </Navbar.Brand>
-          <Navbar.Toggle aria-controls="mobile-sidebar" />
-          <Navbar.Collapse>
-            <Nav className="ms-auto">
-              {navItem.map(({ name, path }) => (
-                <Nav.Link as={Link} to={path}>
-                  {name}
-                </Nav.Link>
+            <span>TaskWise</span>
+          </Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
+          <Nav className="flex-column sidebar-nav">
+            <div className="sidebar-nav-section">
+              {navItems.map((item) => (
+                <SidebarItem
+                  key={item.path}
+                  path={item.path}
+                  icon={item.icon}
+                  label={item.name}
+                  onClick={onClose}
+                />
               ))}
-            </Nav>
-          </Navbar.Collapse>
-        </Container>
-      </Navbar>
+              <div className="sidebar-divider" />
+              <SidebarItem
+                path="/login"
+                icon="box-arrow-right"
+                label="Logout"
+                onClick={handleLogout}
+              />
+            </div>
+          </Nav>
+        </Offcanvas.Body>
+      </Offcanvas>
     </>
   );
 };

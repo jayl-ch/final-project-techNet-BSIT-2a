@@ -1,5 +1,6 @@
 import { Container } from "react-bootstrap";
 import { motion } from "framer-motion";
+import { Link } from "react-router";
 
 const container = {
   hidden: {},
@@ -55,15 +56,15 @@ const Footer = () => {
 
           <motion.div className="col-md-4 text-md-center" variants={fadeUp}>
             <div className="d-flex justify-content-center gap-3">
-              {["bi-github", "bi-twitter-x", "bi-envelope"].map((icon, i) => (
-                <motion.i
-                  key={i}
-                  className={`bi ${icon} fs-5`}
-                  whileHover={{ y: -3, scale: 1.2, color: "#fff" }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                  style={{ cursor: "pointer" }}
-                />
-              ))}
+              <motion.a
+                href="https://www.github.com/jayl-ch/final-project-techNet-BSIT-2a"
+                whileHover={{ y: -3, scale: 1.2, color: "#fff" }}
+                transition={{ type: "spring", stiffness: 300 }}
+                style={{ cursor: "pointer" }}
+                className="text-decoration-none"
+              >
+                <motion.i className={`bi bi-github fs-5`} />
+              </motion.a>
             </div>
           </motion.div>
 

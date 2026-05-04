@@ -98,7 +98,7 @@ const TaskList = ({
                 onEdit={() => onEdit(task)}
                 onComplete={() => onComplete(task.id)}
                 onCycleStatus={() => onCycleStatus(task.id, task.rawStatus)}
-                onDelete={() => onDelete(task.id)}
+                onDelete={() => onDelete(task)}
               />
             ))}
           </div>
