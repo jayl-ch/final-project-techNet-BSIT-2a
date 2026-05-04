@@ -45,14 +45,6 @@ const NavBar = () => {
 
           {/* MOBILE: CTA + Toggler */}
           <div className="d-flex d-lg-none align-items-center gap-2">
-            <Nav.Link
-              as={Link}
-              to="/register"
-              onClick={close}
-              className="btn btn-primary btn-sm fw-semibold px-3"
-            >
-              Get started
-            </Nav.Link>
             <Navbar.Toggle
               aria-controls="main-nav"
               className="border-0 shadow-none"
@@ -62,24 +54,11 @@ const NavBar = () => {
           {/* NAV LINKS */}
           <Navbar.Collapse id="main-nav">
             <Nav className="ms-auto align-items-lg-center gap-1 pb-3 pb-lg-0">
-              {NAV_LINKS.map((label) => (
-                <Nav.Link
-                  key={label}
-                  href={`#${label.toLowerCase()}`}
-                  onClick={close}
-                  className="fw-medium"
-                >
-                  {label}
-                </Nav.Link>
-              ))}
-
-              <hr className="d-lg-none text-secondary my-1" />
-
               <Nav.Link
                 as={Link}
                 to="/login"
                 onClick={close}
-                className="fw-medium"
+                className="fw-medium d-inline-flex align-items-center justify-content-center"
               >
                 Login
               </Nav.Link>
@@ -88,7 +67,7 @@ const NavBar = () => {
                 as={Link}
                 to="/register"
                 onClick={close}
-                className="d-none d-lg-inline-flex align-items-center justify-content-center fw-semibold px-4 rounded-pill signup-btn"
+                className="d-inline-flex align-items-center justify-content-center fw-semibold px-4 rounded-pill signup-btn"
               >
                 Sign Up
               </Nav.Link>
