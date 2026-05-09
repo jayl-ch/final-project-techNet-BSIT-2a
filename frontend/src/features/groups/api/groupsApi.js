@@ -52,6 +52,17 @@ export const assignTaskToMember = async ({ taskId, assignedTo, groupId }) => {
   return response?.data?.assigned ?? null;
 };
 
+export const unassignTaskFromMember = async ({ taskId, groupId }) => {
+  const response = await apiClient.delete("/api/task/assign", {
+    data: {
+      taskId,
+      groupId,
+    },
+  });
+
+  return response?.data?.unassigned ?? null;
+};
+
 export const updateAssignedTaskStatus = async (taskId, status) => {
   const response = await apiClient.patch(`/api/task/update/${taskId}`, { status });
   return response?.data?.newTask;

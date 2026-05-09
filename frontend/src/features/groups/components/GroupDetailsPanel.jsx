@@ -19,6 +19,7 @@ const GroupDetailsPanel = ({
   onDismissAssignError,
   onLeaveGroup,
   onRemoveMember,
+  onUnassignTask,
   onStatusChange,
   currentStudentId,
 }) => {
@@ -84,6 +85,7 @@ const GroupDetailsPanel = ({
               currentStudentId={currentStudentId}
               isOwner={isOwner}
               onRemoveMember={onRemoveMember}
+              onUnassignTask={onUnassignTask}
               onStatusChange={onStatusChange}
             />
           </>
