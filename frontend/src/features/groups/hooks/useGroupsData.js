@@ -3,6 +3,7 @@ import axios from "axios";
 import { clearAuthToken, extractAuthErrorMessage } from "../../auth/api/authApi";
 import {
   assignTaskToMember,
+  unassignTaskFromMember,
   createGroup,
   fetchAssignableTasks,
   fetchGroupDetails,
@@ -162,6 +163,15 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
     await loadGroupDetails();
   }, [loadGroupDetails, selectedGroupId]);
 
+  const unassignTask = useCallback(async (taskId) => {
+    if (!selectedGroupId) {
+      throw new Error("No group selected");
+    }
+
+    await unassignTaskFromMember({ taskId, groupId: selectedGroupId });
+    await loadGroupDetails();
+  }, [loadGroupDetails, selectedGroupId]);
+
   const updateMemberTaskStatus = useCallback(async (taskId, status) => {
     await updateAssignedTaskStatus(taskId, status);
     await loadGroupDetails();
@@ -185,6 +195,7 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
     leaveSelectedGroup,
     removeMemberFromGroup,
     assignTask,
+    unassignTask,
     updateMemberTaskStatus,
   };
 };

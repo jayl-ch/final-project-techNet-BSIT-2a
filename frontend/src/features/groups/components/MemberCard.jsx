@@ -7,6 +7,7 @@ const MemberCard = ({
   currentStudentId,
   isOwner,
   onRemoveMember,
+  onUnassignTask,
   onStatusChange,
 }) => (
   <article className="group-member-card d-flex flex-column rounded-4 p-3">
@@ -88,6 +89,18 @@ const MemberCard = ({
                   </Form.Select>
                 ) : (
                   <StatusBadge status={task.status} />
+                )}
+
+                {isOwner && (
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    className="rounded-pill py-0 px-2 ms-auto"
+                    onClick={() => onUnassignTask?.(task, member)}
+                    title="Remove assignment"
+                  >
+                    <i className="bi bi-x-circle" />
+                  </Button>
                 )}
               </div>
             </div>

@@ -234,6 +234,15 @@ const validateAssignTask = z
   })
   .passthrough();
 
+const validateUnassignTask = z
+  .object({
+    body: z.object({
+      taskId: objectId("taskId is invalid"),
+      groupId: objectId("groupId is invalid"),
+    }),
+  })
+  .passthrough();
+
 module.exports = {
   validateRegister,
   validateLogin,
@@ -245,4 +254,5 @@ module.exports = {
   validateCreateTask,
   validateUpdateTask,
   validateAssignTask,
+  validateUnassignTask,
 };

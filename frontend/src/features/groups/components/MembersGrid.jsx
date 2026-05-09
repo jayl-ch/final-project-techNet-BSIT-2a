@@ -5,6 +5,7 @@ const MembersGrid = ({
   currentStudentId,
   isOwner,
   onRemoveMember,
+  onUnassignTask,
   onStatusChange,
 }) => {
   if (members.length === 0) {
@@ -25,6 +26,7 @@ const MembersGrid = ({
           currentStudentId={currentStudentId}
           isOwner={isOwner}
           onRemoveMember={onRemoveMember}
+          onUnassignTask={onUnassignTask}
           onStatusChange={onStatusChange}
         />
       ))}

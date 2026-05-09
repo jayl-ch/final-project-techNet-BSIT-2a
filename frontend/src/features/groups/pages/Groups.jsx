@@ -53,21 +53,25 @@ const Groups = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showJoinModal, setShowJoinModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showUnassignModal, setShowUnassignModal] = useState(false);
   const [createForm, setCreateForm] = useState(createInitialForm);
   const [joinForm, setJoinForm] = useState(joinInitialForm);
   const [assignForm, setAssignForm] = useState(assignInitialForm);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [unassignTarget, setUnassignTarget] = useState(null);
 
   const [createLoading, setCreateLoading] = useState(false);
   const [joinLoading, setJoinLoading] = useState(false);
   const [assignLoading, setAssignLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
+  const [unassignLoading, setUnassignLoading] = useState(false);
 
   const [createError, setCreateError] = useState("");
   const [joinError, setJoinError] = useState("");
   const [actionError, setActionError] = useState("");
   const [assignError, setAssignError] = useState("");
   const [deleteError, setDeleteError] = useState("");
+  const [unassignError, setUnassignError] = useState("");
 
   /* ─── Data hook ─── */
   const {
@@ -86,6 +90,7 @@ const Groups = () => {
     leaveSelectedGroup,
     removeMemberFromGroup,
     assignTask,
+    unassignTask,
     updateMemberTaskStatus,
   } = useGroupsData(handleUnauthorized, selectedGroupId);
 
@@ -127,6 +132,26 @@ const Groups = () => {
     setShowDeleteModal(false);
     setDeleteTarget(null);
     setDeleteError("");
+  };
+
+  const handleOpenUnassign = (task, member) => {
+    if (!task?.taskId) {
+      return;
+    }
+
+    setUnassignTarget({
+      taskId: task.taskId,
+      taskName: task.taskName || "this task",
+      memberName: member?.name || "this member",
+    });
+    setUnassignError("");
+    setShowUnassignModal(true);
+  };
+
+  const handleCloseUnassign = () => {
+    setShowUnassignModal(false);
+    setUnassignTarget(null);
+    setUnassignError("");
   };
 
   const handleCreateChange = ({ target: { name, value } }) =>
@@ -186,6 +211,25 @@ const Groups = () => {
       setDeleteError(err?.response?.data?.message || "Failed to delete group.");
     } finally {
       setDeleteLoading(false);
+    }
+  };
+
+  const handleConfirmUnassign = async () => {
+    if (!unassignTarget) {
+      return;
+    }
+
+    setUnassignLoading(true);
+    setUnassignError("");
+    try {
+      await unassignTask(unassignTarget.taskId);
+      handleCloseUnassign();
+    } catch (err) {
+      setUnassignError(
+        err?.response?.data?.message || "Failed to remove assignment.",
+      );
+    } finally {
+      setUnassignLoading(false);
     }
   };
 
@@ -306,6 +350,7 @@ const Groups = () => {
             onDismissAssignError={() => setAssignError("")}
             onLeaveGroup={handleLeaveGroup}
             onRemoveMember={handleRemoveMember}
+            onUnassignTask={handleOpenUnassign}
             onStatusChange={handleStatusChange}
             currentStudentId={currentStudentId}
           />
@@ -352,6 +397,25 @@ const Groups = () => {
         onConfirm={handleConfirmDelete}
         onCancel={handleCloseDelete}
         onDismissError={() => setDeleteError("")}
+      />
+
+      <ConfirmActionModal
+        show={showUnassignModal}
+        title="Remove assignment?"
+        message={
+          <>
+            Remove <strong>{unassignTarget?.taskName || "this task"}</strong> from
+            <strong> {unassignTarget?.memberName || "this member"}</strong>?
+          </>
+        }
+        confirmLabel="Remove assignment"
+        loadingLabel="Removing..."
+        confirmVariant="outline-danger"
+        loading={unassignLoading}
+        error={unassignError}
+        onConfirm={handleConfirmUnassign}
+        onCancel={handleCloseUnassign}
+        onDismissError={() => setUnassignError("")}
       />
     </MotionDiv>
   );
