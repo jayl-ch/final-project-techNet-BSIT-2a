@@ -164,8 +164,15 @@ npm start
 | POST | `/api/task/create` | Create task |
 | PATCH | `/api/task/update/:id` | Update task |
 | POST | `/api/task/assign` | Assign task to member (group admin only) |
+| DELETE | `/api/task/assign` | Remove task assignment (group admin only) |
 | POST | `/api/task/priority/:id` | Recompute and persist task priority |
 | DELETE | `/api/task/delete/:id` | Delete task |
+
+## Task Assignment Rules
+
+- A task can be assigned to only one member per group at a time.
+- If a task is already assigned, attempts to assign it to another member return a conflict error.
+- Group admins can unassign a task via `DELETE /api/task/assign` before reassigning.
 
 ## Validation and Error Contract
 
@@ -193,7 +200,7 @@ npm start
 
 ## Roles and Authorization Rules
 
-- Group admin can: delete group, remove members, assign tasks.
+- Group admin can: delete group, remove members, assign tasks, unassign tasks.
 - Group member can: join group, view authorized group details, leave group.
 - Group admin cannot leave a group via leave endpoint; admin should delete group.
 
