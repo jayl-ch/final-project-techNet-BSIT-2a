@@ -10,13 +10,17 @@ const {
 } = require("../controllers/task.controller");
 
 const { setPriority } = require("../controllers/task.priority.controller");
-const assignTask = require("../controllers/task.assignment.controller");
+const {
+  assignTask,
+  unassignTask,
+} = require("../controllers/task.assignment.controller");
 const authMiddleware = require("../middlewares/auth.middleware");
 const validateRequest = require("../middlewares/validate.middleware");
 const {
   validateCreateTask,
   validateUpdateTask,
   validateAssignTask,
+  validateUnassignTask,
 } = require("../validators/request.validators");
 
 // GET ALL THE TASKS
@@ -44,6 +48,13 @@ taskRouter.post(
   authMiddleware,
   validateRequest(validateAssignTask),
   assignTask,
+);
+
+taskRouter.delete(
+  "/task/assign",
+  authMiddleware,
+  validateRequest(validateUnassignTask),
+  unassignTask,
 );
 
 // TASK PRIORITY

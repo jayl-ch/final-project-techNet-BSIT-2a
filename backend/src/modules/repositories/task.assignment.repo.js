@@ -12,6 +12,10 @@ const findAssignedTasksByStudent = async (assignedTo) => {
   return await TaskAssignment.find({ assignedTo }).populate("taskId");
 };
 
+const findByTaskAndGroup = async (taskId, groupId) => {
+  return await TaskAssignment.findOne({ taskId, groupId });
+};
+
 const createTaskAssignment = async (taskId, assignedTo, groupId) => {
   return await TaskAssignment.create({ taskId, assignedTo, groupId });
 };
@@ -30,12 +34,18 @@ const deleteByGroupAndStudent = async (groupId, assignedTo) => {
   return await TaskAssignment.deleteMany({ groupId, assignedTo });
 };
 
+const deleteByTaskAndGroup = async (taskId, groupId) => {
+  return await TaskAssignment.findOneAndDelete({ taskId, groupId });
+};
+
 module.exports = {
   existsByTaskUserGroup,
   existsByTaskAndUser,
   findAssignedTasksByStudent,
+  findByTaskAndGroup,
   createTaskAssignment,
   findByGroupIdWithTaskAndStudent,
   deleteByGroupId,
   deleteByGroupAndStudent,
+  deleteByTaskAndGroup,
 };
