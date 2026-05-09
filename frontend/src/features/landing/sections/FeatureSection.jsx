@@ -112,13 +112,16 @@ const FeatureSection = () => {
         >
           <div className="col-lg-10 col-md-12 text-center">
             <MotionH2
-              className="text-dark display-5 fw-bold mb-3"
+              className="landing-section-title text-dark display-5 fw-bold mb-3"
               variants={fadeUp}
             >
               Everything You Need
             </MotionH2>
 
-            <MotionP className="lead text-dark fs-5" variants={fadeUp}>
+            <MotionP
+              className="landing-section-lead lead text-dark fs-5"
+              variants={fadeUp}
+            >
               Powerful features designed for students
             </MotionP>
           </div>

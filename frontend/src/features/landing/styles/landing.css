@@ -29,6 +29,24 @@
   left: -50px;
 }
 
+.hero-title {
+  font-size: clamp(2.25rem, 5vw + 1rem, 4.25rem);
+  line-height: 1.1;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 1vw + 0.85rem, 1.35rem);
+}
+
+.landing-section-title {
+  font-size: clamp(1.75rem, 2.8vw + 1rem, 3rem);
+  line-height: 1.2;
+}
+
+.landing-section-lead {
+  font-size: clamp(1rem, 1.2vw + 0.85rem, 1.25rem);
+}
+
 .transition-lift {
   transition:
     transform 0.2s ease,

@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Container, Button } from "react-bootstrap";
+import { Link } from "react-router";
 
 import {
   containerVariants,
@@ -40,11 +41,17 @@ const CTASection = () => {
         className="text-center position-relative"
         style={{ zIndex: 1 }}
       >
-        <motion.h2 variants={fadeUp} className="display-6 fw-bold mb-4">
+        <motion.h2
+          variants={fadeUp}
+          className="landing-section-title display-6 fw-bold mb-4"
+        >
           Ready to Get Organized?
         </motion.h2>
 
-        <motion.p variants={fadeUp} className="lead fs-5 mb-5 opacity-90">
+        <motion.p
+          variants={fadeUp}
+          className="landing-section-lead lead fs-5 mb-5 opacity-90"
+        >
           Start managing your tasks today and boost your productivity.
         </motion.p>
 
@@ -58,7 +65,7 @@ const CTASection = () => {
             whileHover="hover"
             whileTap="tap"
           >
-            <Button variant="light" size="lg" className="px-5 fw-600">
+            <Button variant="light" size="lg" className="px-5 fw-600" as={Link} to="/login">
               <i className="bi bi-play-fill me-2"></i>Start Now
             </Button>
           </motion.div>
@@ -69,7 +76,7 @@ const CTASection = () => {
             whileHover="hover"
             whileTap="tap"
           >
-            <Button variant="outline-light" size="lg" className="px-5 fw-600">
+            <Button variant="outline-light" size="lg" className="px-5 fw-600" as={Link} to="/register">
               <i className="bi bi-file-earmark-plus me-2"></i>Create Free
               Account
             </Button>

@@ -71,10 +71,16 @@ const HeroSection = () => {
       >
         <motion.div className="row justify-content-center">
           <div className="col-lg-8 col-md-10 text-center">
-            <motion.h1 variants={fadeUp} className="display-3 fw-bold mb-4">
+            <motion.h1
+              variants={fadeUp}
+              className="hero-title display-3 fw-bold mb-4"
+            >
               Manage Your Tasks <span className="text-warning">Smarter</span>
             </motion.h1>
-            <motion.p variants={fadeUp} className="lead fs-5 mb-5 opacity-90">
+            <motion.p
+              variants={fadeUp}
+              className="hero-subtitle lead mb-5 opacity-90"
+            >
               Organize assignments, track deadlines, and boost productivity with
               intelligent task management designed for students.
             </motion.p>
