@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  apiClient,
   clearAuthToken,
   getAuthStudent,
   authLogoutStudent,
 } from "../../auth/api/authApi";
 import { useNavigate } from "react-router-dom";
+import { fetchTasks } from "../../tasks/api/tasksApi";
 
 const isSameDay = (firstDate, secondDate) => {
   return (
@@ -40,6 +42,8 @@ const createNotification = ({
     icon,
   };
 };
+
+const SUPPORT_EMAIL = "support@taskwise.app";
 
 const buildTaskNotifications = (tasks) => {
   if (!Array.isArray(tasks) || tasks.length === 0) {
@@ -148,57 +152,59 @@ const buildTaskNotifications = (tasks) => {
   return notifications;
 };
 
+const isUnauthorizedError = (error) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
+
 export const useTopbarData = () => {
   const navigate = useNavigate();
-  const [studentName, setStudentName] = useState("Student");
-  const [studentEmail, setStudentEmail] = useState("");
+  const queryClient = useQueryClient();
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
   const unreadCount = useMemo(() => {
     return notifications.filter((notification) => notification.unread).length;
   }, [notifications]);
 
+  const handleUnauthorized = useCallback(() => {
+    clearAuthToken();
+    navigate("/login", { replace: true });
+  }, [navigate]);
+
+  const studentQuery = useQuery({
+    queryKey: ["student"],
+    queryFn: async () => {
+      const response = await getAuthStudent();
+      return response?.data?.student ?? null;
+    },
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const tasksQuery = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const studentName = studentQuery.data?.name || "Student";
+  const studentEmail = studentQuery.data?.email || "";
+
   useEffect(() => {
-    let mounted = true;
-
-    const loadTopbarData = async () => {
-      const [studentResult, taskResult] = await Promise.allSettled([
-        getAuthStudent(),
-        apiClient.get("/api/task"),
-      ]);
-
-      const isUnauthorized = [studentResult, taskResult].some((result) => {
-        return (
-          result.status === "rejected" &&
-          result.reason?.response?.status === 401
-        );
-      });
-
-      if (isUnauthorized) {
-        clearAuthToken();
-        navigate("/login", { replace: true });
-        return;
-      }
-
-      if (!mounted) {
-        return;
-      }
-
-      if (studentResult.status === "fulfilled") {
-        const student = studentResult.value?.data?.student;
-        setStudentName(student?.name || "Student");
-        setStudentEmail(student?.email || "");
-      }
-
-      if (taskResult.status === "fulfilled") {
-        const tasks = Array.isArray(taskResult.value?.data?.tasks)
-          ? taskResult.value.data.tasks
-          : [];
-        setNotifications(buildTaskNotifications(tasks));
-        return;
-      }
-
+    if (tasksQuery.error && !isUnauthorizedError(tasksQuery.error)) {
       setNotifications([
         createNotification({
           id: "error",
@@ -209,14 +215,13 @@ export const useTopbarData = () => {
           icon: "bell",
         }),
       ]);
-    };
+      return;
+    }
 
-    loadTopbarData();
-
-    return () => {
-      mounted = false;
-    };
-  }, [navigate]);
+    if (tasksQuery.data) {
+      setNotifications(buildTaskNotifications(tasksQuery.data));
+    }
+  }, [tasksQuery.data, tasksQuery.error]);
 
   const openProfileModal = useCallback(() => {
     setShowProfileModal(true);
@@ -226,13 +231,29 @@ export const useTopbarData = () => {
     setShowProfileModal(false);
   }, []);
 
-  const handleSignOut = useCallback(async () => {
-    await authLogoutStudent();
-    navigate("/login", { replace: true });
+  const openSupportModal = useCallback(() => {
+    setShowSupportModal(true);
+  }, []);
+
+  const closeSupportModal = useCallback(() => {
+    setShowSupportModal(false);
+  }, []);
+
+  const handleGoToProfile = useCallback(() => {
+    navigate("/profile");
   }, [navigate]);
 
+  const handleSignOut = useCallback(async () => {
+    try {
+      await authLogoutStudent();
+    } finally {
+      queryClient.clear();
+      navigate("/login", { replace: true });
+    }
+  }, [navigate, queryClient]);
+
   const handleSupport = useCallback(() => {
-    window.location.href = "mailto:support@taskwise.app";
+    window.location.href = `mailto:${SUPPORT_EMAIL}`;
   }, []);
 
   const handleReadNotification = useCallback((notificationId) => {
@@ -263,10 +284,15 @@ export const useTopbarData = () => {
     studentName,
     studentEmail,
     showProfileModal,
+    showSupportModal,
     notifications,
     unreadCount,
     openProfileModal,
     closeProfileModal,
+    openSupportModal,
+    closeSupportModal,
+    supportEmail: SUPPORT_EMAIL,
+    handleGoToProfile,
     handleSignOut,
     handleSupport,
     handleReadNotification,

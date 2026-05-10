@@ -1,27 +1,35 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { authRegStudent, extractAuthErrorMessage } from "../api/authApi";
 
 export const useRegister = () => {
-	const [data, setData] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const {
+		mutateAsync: registerAsync,
+		isPending,
+		error,
+		data,
+		reset,
+	} = useMutation({
+		mutationFn: authRegStudent,
+	});
 
-	const register = useCallback(async (credentials) => {
-		setLoading(true);
-		setError(null);
+	const register = useCallback(
+		async (credentials) => {
+			reset();
+			try {
+				const response = await registerAsync(credentials);
+				return response?.data ?? null;
+			} catch {
+				return null;
+			}
+		},
+		[registerAsync, reset],
+	);
 
-		try {
-			const response = await authRegStudent(credentials);
-			const payload = response?.data ?? null;
-			setData(payload);
-			return payload;
-		} catch (err) {
-			setError(extractAuthErrorMessage(err));
-			return null;
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	return { data, loading, error, register };
+	return {
+		data: data?.data ?? null,
+		loading: isPending,
+		error: error ? extractAuthErrorMessage(error) : null,
+		register,
+	};
 };

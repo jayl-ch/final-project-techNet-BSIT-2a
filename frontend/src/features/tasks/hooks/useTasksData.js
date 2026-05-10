@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearAuthToken, extractAuthErrorMessage } from "../../auth/api/authApi";
 import {
   createTask,
@@ -77,37 +78,99 @@ const isOverdueTask = (task) => {
   return parseDueDate(task.deadlineISO) < Date.now();
 };
 
+const isUnauthorizedError = (error) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
+
 export const useTasksData = (onUnauthorized) => {
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortBy, setSortBy] = useState("due");
 
-  const loadTasks = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const result = await fetchTasks();
-      setTasks(Array.isArray(result) ? result : []);
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        clearAuthToken();
-        onUnauthorized?.();
-        return;
-      }
-
-      setError(extractAuthErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+  const handleUnauthorized = useCallback(() => {
+    clearAuthToken();
+    onUnauthorized?.();
   }, [onUnauthorized]);
 
-  useEffect(() => {
-    loadTasks();
-  }, [loadTasks]);
+  const tasksQuery = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const tasks = Array.isArray(tasksQuery.data) ? tasksQuery.data : [];
+  const loading = tasksQuery.isLoading;
+  const error =
+    tasksQuery.error && !isUnauthorizedError(tasksQuery.error)
+      ? extractAuthErrorMessage(tasksQuery.error)
+      : "";
+
+  const updateTasksCache = useCallback(
+    (updater) => {
+      queryClient.setQueryData(["tasks"], (current) => {
+        const safeCurrent = Array.isArray(current) ? current : [];
+        return updater(safeCurrent);
+      });
+    },
+    [queryClient],
+  );
+
+  const { mutateAsync: createTaskAsync } = useMutation({
+    mutationFn: createTask,
+    onSuccess: (created) => {
+      if (created?._id) {
+        updateTasksCache((current) => [created, ...current]);
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      }
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: updateTaskAsync } = useMutation({
+    mutationFn: ({ taskId, payload }) => updateTask(taskId, payload),
+    onSuccess: (updated) => {
+      if (updated?._id) {
+        updateTasksCache((current) =>
+          current.map((task) =>
+            task._id === updated._id ? { ...task, ...updated } : task,
+          ),
+        );
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      }
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: deleteTaskAsync } = useMutation({
+    mutationFn: deleteTask,
+    onSuccess: (_, taskId) => {
+      updateTasksCache((current) =>
+        current.filter((task) => task._id !== taskId),
+      );
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
 
   const taskItems = useMemo(() => {
     return tasks.map(toTaskItem);
@@ -202,60 +265,47 @@ export const useTasksData = (onUnauthorized) => {
       }));
   }, [taskItems]);
 
-  const completeTask = useCallback(async (taskId) => {
-    await updateTask(taskId, { status: "completed" });
-    setTasks((prev) =>
-      prev.map((task) =>
-        task._id === taskId ? { ...task, status: "completed" } : task,
-      ),
-    );
-  }, []);
+  const completeTask = useCallback(
+    async (taskId) => {
+      await updateTaskAsync({ taskId, payload: { status: "completed" } });
+    },
+    [updateTaskAsync],
+  );
 
-  const cycleTaskStatus = useCallback(async (taskId, currentStatus) => {
-    const nextStatus =
-      currentStatus === "pending"
-        ? "in-progress"
-        : currentStatus === "in-progress"
-          ? "completed"
-          : "pending";
+  const cycleTaskStatus = useCallback(
+    async (taskId, currentStatus) => {
+      const nextStatus =
+        currentStatus === "pending"
+          ? "in-progress"
+          : currentStatus === "in-progress"
+            ? "completed"
+            : "pending";
 
-    await updateTask(taskId, { status: nextStatus });
-    setTasks((prev) =>
-      prev.map((task) =>
-        task._id === taskId ? { ...task, status: nextStatus } : task,
-      ),
-    );
-  }, []);
+      await updateTaskAsync({ taskId, payload: { status: nextStatus } });
+    },
+    [updateTaskAsync],
+  );
 
-  const removeTask = useCallback(async (taskId) => {
-    await deleteTask(taskId);
-    setTasks((prev) => prev.filter((task) => task._id !== taskId));
-  }, []);
+  const removeTask = useCallback(
+    async (taskId) => {
+      await deleteTaskAsync(taskId);
+    },
+    [deleteTaskAsync],
+  );
 
-  const addTask = useCallback(async (taskPayload) => {
-    const created = await createTask(taskPayload);
+  const addTask = useCallback(
+    async (taskPayload) => {
+      return createTaskAsync(taskPayload);
+    },
+    [createTaskAsync],
+  );
 
-    if (created?._id) {
-      setTasks((prev) => [created, ...prev]);
-    } else {
-      await loadTasks();
-    }
-  }, [loadTasks]);
-
-  const editTask = useCallback(async (taskId, taskPayload) => {
-    const updated = await updateTask(taskId, taskPayload);
-
-    if (!updated?._id) {
-      await loadTasks();
-      return;
-    }
-
-    setTasks((prev) =>
-      prev.map((task) =>
-        task._id === taskId ? { ...task, ...updated } : task,
-      ),
-    );
-  }, [loadTasks]);
+  const editTask = useCallback(
+    async (taskId, taskPayload) => {
+      return updateTaskAsync({ taskId, payload: taskPayload });
+    },
+    [updateTaskAsync],
+  );
 
   return {
     loading,
@@ -270,7 +320,7 @@ export const useTasksData = (onUnauthorized) => {
     stats,
     completion,
     upcomingMilestones,
-    reload: loadTasks,
+    reload: tasksQuery.refetch,
     completeTask,
     cycleTaskStatus,
     removeTask,
