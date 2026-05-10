@@ -110,6 +110,6 @@ This system helps students organize their academic tasks in one platform. It wou
 
 ## Built with
 
-- Frontend: React (Vite), React Router, Bootstrap + React-Bootstrap, Axios, Framer Motion
+- Frontend: React (Vite), React Router, Bootstrap + React-Bootstrap, Axios, Framer Motion, TanStack Query
 - Backend: Node.js, Express, Mongoose, JWT, Zod, bcrypt, Helmet, CORS, dotenv
 - Database: MongoDB
