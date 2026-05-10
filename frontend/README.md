@@ -9,6 +9,7 @@ TaskWise frontend is a React (Vite) single-page app for student task management,
 - React-Bootstrap + Bootstrap + Bootstrap Icons
 - Axios
 - Framer Motion
+- TanStack Query
 
 ## Requirements
 
