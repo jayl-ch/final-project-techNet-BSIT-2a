@@ -40,6 +40,19 @@ const toDateTimeLocalValue = (value) => {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 };
 
+const toIsoDeadline = (value) => {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toISOString();
+};
+
 const shellVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -143,7 +156,11 @@ const Tasks = () => {
     setSaveError("");
 
     try {
-      await addTask(formValues);
+      const payload = {
+        ...formValues,
+        deadline: toIsoDeadline(formValues.deadline),
+      };
+      await addTask(payload);
       handleCloseCreate();
     } catch (err) {
       setSaveError(err?.response?.data?.message || "Failed to create task.");
@@ -199,7 +216,11 @@ const Tasks = () => {
     setEditError("");
 
     try {
-      await editTask(editingTaskId, editValues);
+      const payload = {
+        ...editValues,
+        deadline: toIsoDeadline(editValues.deadline),
+      };
+      await editTask(editingTaskId, payload);
       handleCloseEdit();
     } catch (err) {
       setEditError(err?.response?.data?.message || "Failed to update task.");

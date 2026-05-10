@@ -1,4 +1,4 @@
-import { Alert, Button, Form, Modal, Spinner } from "react-bootstrap";
+import { Alert, Button, Form, Modal, Spinner, InputGroup } from "react-bootstrap";
 
 const TaskFormModal = ({
   show,
@@ -56,24 +56,30 @@ const TaskFormModal = ({
               name="difficulty"
               value={difficultyValue}
               onChange={onChange}
+              style={{ color: "yellow" }}
             >
-              <option value={1}>1 - Easiest</option>
-              <option value={2}>2</option>
-              <option value={3}>3 - Medium</option>
-              <option value={4}>4</option>
-              <option value={5}>5 - Hardest</option>
+              {["★", "★★", "★★★", "★★★★", "★★★★★"].map((item, i) => (
+                <option key={i} value={i+1}>{item}</option>
+              ))}
             </Form.Select>
           </Form.Group>
 
           <Form.Group className="mb-3" controlId={`${idPrefix}-deadline`}>
             <Form.Label>Deadline</Form.Label>
-            <Form.Control
-              type="datetime-local"
-              name="deadline"
-              required
-              value={displayValues.deadline || ""}
-              onChange={onChange}
-            />
+            <InputGroup>
+              <InputGroup.Text>
+                <i className="bi bi-calendar-event" aria-hidden="true" />
+              </InputGroup.Text>
+              <Form.Control
+                type="datetime-local"
+                name="deadline"
+                required
+                value={displayValues.deadline || ""}
+                onChange={onChange}
+                step={900}
+                aria-label="Deadline date and time"
+              />
+            </InputGroup>
           </Form.Group>
 
           <Form.Group controlId={`${idPrefix}-status`}>

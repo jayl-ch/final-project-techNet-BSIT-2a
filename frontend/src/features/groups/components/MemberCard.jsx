@@ -66,7 +66,7 @@ const MemberCard = ({
                 {canEdit ? (
                   <Form.Select
                     size="sm"
-                    className={`w-auto shadow-none d-inline-block text-white bg-${statusMeta.bg} border-0 rounded-pill py-0 px-3`}
+                    className={`w-auto shadow-none d-inline-block text-white bg-${statusMeta.bg} border-0 rounded-pill py-0`}
                     style={{
                       minHeight: "24px",
                       fontSize: "0.75rem",
