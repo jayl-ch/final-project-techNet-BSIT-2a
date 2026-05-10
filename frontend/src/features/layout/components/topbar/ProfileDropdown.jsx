@@ -1,13 +1,16 @@
 import { Nav, Dropdown, Modal, Button } from "react-bootstrap";
 
 const ProfileDropdown = ({
-  theme,
   studentName,
   studentEmail,
   showProfileModal,
+  showSupportModal,
+  supportEmail,
+  onGoToProfile,
   onOpenProfile,
   onCloseProfile,
-  onToggleTheme,
+  onOpenSupport,
+  onCloseSupport,
   onSupport,
   onSignOut,
 }) => {
@@ -26,11 +29,9 @@ const ProfileDropdown = ({
           </Dropdown.Toggle>
 
           <Dropdown.Menu align="end">
-            <Dropdown.Item onClick={onOpenProfile}>Edit Profile</Dropdown.Item>
-            <Dropdown.Item onClick={onToggleTheme}>
-              Switch to {theme === "dark" ? "light" : "dark"} mode
-            </Dropdown.Item>
-            <Dropdown.Item onClick={onSupport}>Support</Dropdown.Item>
+            <Dropdown.Item onClick={onGoToProfile}>Profile Settings</Dropdown.Item>
+            <Dropdown.Item onClick={onOpenProfile}>Account Details</Dropdown.Item>
+            <Dropdown.Item onClick={onOpenSupport}>Contact Support</Dropdown.Item>
             <Dropdown.Divider></Dropdown.Divider>
             <Dropdown.Item onClick={onSignOut}>Sign out</Dropdown.Item>
           </Dropdown.Menu>
@@ -52,6 +53,35 @@ const ProfileDropdown = ({
         <Modal.Footer>
           <Button variant="secondary" onClick={onCloseProfile}>
             Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <Modal centered show={showSupportModal} onHide={onCloseSupport}>
+        <Modal.Header closeButton>
+          <Modal.Title>Contact Support</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="mb-3">
+            Need help with tasks, groups, or your account? Email us at:
+          </p>
+          <div className="d-flex align-items-center gap-2">
+            <i className="bi bi-envelope"></i>
+            <strong>{supportEmail}</strong>
+          </div>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="outline-secondary" onClick={onCloseSupport}>
+            Close
+          </Button>
+          <Button
+            variant="primary"
+            onClick={() => {
+              onSupport();
+              onCloseSupport();
+            }}
+          >
+            Email Support
           </Button>
         </Modal.Footer>
       </Modal>

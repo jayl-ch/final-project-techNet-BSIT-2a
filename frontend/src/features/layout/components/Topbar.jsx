@@ -11,10 +11,15 @@ const Topbar = ({ onOpenSidebar = () => {} }) => {
     studentName,
     studentEmail,
     showProfileModal,
+    showSupportModal,
     notifications,
     unreadCount,
     openProfileModal,
     closeProfileModal,
+    openSupportModal,
+    closeSupportModal,
+    supportEmail,
+    handleGoToProfile,
     handleSignOut,
     handleSupport,
     handleReadNotification,
@@ -37,13 +42,16 @@ const Topbar = ({ onOpenSidebar = () => {} }) => {
               onReadNotification={handleReadNotification}
             />
             <ProfileDropdown
-              theme={theme}
               studentName={studentName}
               studentEmail={studentEmail}
               showProfileModal={showProfileModal}
+              showSupportModal={showSupportModal}
+              supportEmail={supportEmail}
+              onGoToProfile={handleGoToProfile}
               onOpenProfile={openProfileModal}
               onCloseProfile={closeProfileModal}
-              onToggleTheme={toggleTheme}
+              onOpenSupport={openSupportModal}
+              onCloseSupport={closeSupportModal}
               onSupport={handleSupport}
               onSignOut={handleSignOut}
             />
