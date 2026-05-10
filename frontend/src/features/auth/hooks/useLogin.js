@@ -1,30 +1,35 @@
-import { useCallback, useState } from "react";
-import {
-	authLogStudent,
-	extractAuthErrorMessage,
-} from "../api/authApi";
+import { useCallback } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { authLogStudent, extractAuthErrorMessage } from "../api/authApi";
 
 export const useLogin = () => {
-	const [data, setData] = useState(null);
-	const [loading, setLoading] = useState(false);
-	const [error, setError] = useState(null);
+	const {
+		mutateAsync: loginAsync,
+		isPending,
+		error,
+		data,
+		reset,
+	} = useMutation({
+		mutationFn: authLogStudent,
+	});
 
-	const login = useCallback(async (credentials) => {
-		setLoading(true);
-		setError(null);
+	const login = useCallback(
+		async (credentials) => {
+			reset();
+			try {
+				const response = await loginAsync(credentials);
+				return response?.data ?? null;
+			} catch {
+				return null;
+			}
+		},
+		[loginAsync, reset],
+	);
 
-		try {
-			const response = await authLogStudent(credentials);
-			const payload = response?.data ?? null;
-			setData(payload);
-			return payload;
-		} catch (err) {
-			setError(extractAuthErrorMessage(err));
-			return null;
-		} finally {
-			setLoading(false);
-		}
-	}, []);
-
-	return { data, loading, error, login };
+	return {
+		data: data?.data ?? null,
+		loading: isPending,
+		error: error ? extractAuthErrorMessage(error) : null,
+		login,
+	};
 };

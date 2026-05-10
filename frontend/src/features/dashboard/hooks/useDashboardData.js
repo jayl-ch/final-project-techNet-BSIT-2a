@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { clearAuthToken, extractAuthErrorMessage } from "../../auth/api/authApi";
 import { fetchDashboardData, updateTaskStatus } from "../api/dashboardApi";
 
@@ -112,49 +113,74 @@ const buildTaskItem = (task) => {
   };
 };
 
+const isUnauthorizedError = (error) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
+
 export const useDashboardData = (onUnauthorized) => {
-  const [student, setStudent] = useState(null);
-  const [tasks, setTasks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const queryClient = useQueryClient();
 
-  const loadDashboardData = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const data = await fetchDashboardData();
-      setStudent(data.student);
-      setTasks(Array.isArray(data.tasks) ? data.tasks : []);
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        clearAuthToken();
-        onUnauthorized?.();
-        return;
-      }
-
-      setError(extractAuthErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+  const handleUnauthorized = useCallback(() => {
+    clearAuthToken();
+    onUnauthorized?.();
   }, [onUnauthorized]);
 
-  useEffect(() => {
-    loadDashboardData();
-  }, [loadDashboardData]);
+  const dashboardQuery = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: fetchDashboardData,
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
 
-  const completeTask = useCallback(async (taskId) => {
-    try {
-      await updateTaskStatus(taskId, "completed");
-      setTasks((prev) =>
-        prev.map((task) =>
-          task._id === taskId ? { ...task, status: "completed" } : task
-        )
-      );
-    } catch (err) {
-      console.error("Failed to complete task:", err);
-    }
-  }, []);
+  const student = dashboardQuery.data?.student ?? null;
+  const tasks = Array.isArray(dashboardQuery.data?.tasks)
+    ? dashboardQuery.data.tasks
+    : [];
+  const loading = dashboardQuery.isLoading;
+  const error =
+    dashboardQuery.error && !isUnauthorizedError(dashboardQuery.error)
+      ? extractAuthErrorMessage(dashboardQuery.error)
+      : "";
+
+  const { mutateAsync: completeTaskAsync } = useMutation({
+    mutationFn: (taskId) => updateTaskStatus(taskId, "completed"),
+    onSuccess: (_, taskId) => {
+      queryClient.setQueryData(["dashboard"], (current) => {
+        if (!current) {
+          return current;
+        }
+
+        const currentTasks = Array.isArray(current.tasks) ? current.tasks : [];
+        return {
+          ...current,
+          tasks: currentTasks.map((task) =>
+            task._id === taskId ? { ...task, status: "completed" } : task,
+          ),
+        };
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const completeTask = useCallback(
+    async (taskId) => {
+      try {
+        await completeTaskAsync(taskId);
+      } catch (err) {
+        console.error("Failed to complete task:", err);
+      }
+    },
+    [completeTaskAsync],
+  );
 
   const taskItems = useMemo(() => {
     return [...tasks]
@@ -275,7 +301,7 @@ export const useDashboardData = (onUnauthorized) => {
     progress,
     loading,
     error,
-    reload: loadDashboardData,
+    reload: dashboardQuery.refetch,
     completeTask,
   };
 };

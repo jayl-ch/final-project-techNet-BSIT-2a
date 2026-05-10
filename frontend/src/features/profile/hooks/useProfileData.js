@@ -1,4 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import axios from "axios";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   apiClient,
   clearAuthToken,
@@ -13,12 +15,12 @@ const createFormFromProfile = (profile) => ({
   newPassword: "",
 });
 
+const isUnauthorizedError = (error) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
+
 export const useProfileData = (onUnauthorized) => {
-  const [profile, setProfile] = useState(null);
+  const queryClient = useQueryClient();
   const [formValues, setFormValues] = useState(createFormFromProfile(null));
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
   const [saveError, setSaveError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
@@ -29,31 +31,32 @@ export const useProfileData = (onUnauthorized) => {
     }
   }, [onUnauthorized]);
 
-  const loadProfile = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
+  const profileQuery = useQuery({
+    queryKey: ["student"],
+    queryFn: async () => {
       const response = await getAuthStudent();
-      const student = response?.data?.student || null;
-
-      setProfile(student);
-      setFormValues(createFormFromProfile(student));
-    } catch (err) {
-      if (err?.response?.status === 401) {
+      return response?.data?.student ?? null;
+    },
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
         handleUnauthorized();
-        return;
       }
+    },
+  });
 
-      setError(extractAuthErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }, [handleUnauthorized]);
+  const profile = profileQuery.data ?? null;
+  const loading = profileQuery.isLoading;
+  const error =
+    profileQuery.error && !isUnauthorizedError(profileQuery.error)
+      ? extractAuthErrorMessage(profileQuery.error)
+      : "";
 
   useEffect(() => {
-    loadProfile();
-  }, [loadProfile]);
+    setFormValues(createFormFromProfile(profile));
+  }, [profile]);
 
   const completion = useMemo(() => {
     if (!profile) {
@@ -83,8 +86,24 @@ export const useProfileData = (onUnauthorized) => {
     setSuccessMessage("");
   }, [profile]);
 
+  const { mutateAsync: saveProfileAsync, isPending: saving } = useMutation({
+    mutationFn: async (payload) => {
+      const response = await apiClient.patch("/api/student", payload);
+      return response?.data?.student ?? null;
+    },
+    onSuccess: (updatedProfile) => {
+      queryClient.setQueryData(["student"], updatedProfile);
+      setFormValues(createFormFromProfile(updatedProfile));
+      setSuccessMessage("Profile updated successfully.");
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
   const saveProfile = useCallback(async () => {
-    setSaving(true);
     setSaveError("");
     setSuccessMessage("");
 
@@ -99,23 +118,16 @@ export const useProfileData = (onUnauthorized) => {
     }
 
     try {
-      const response = await apiClient.patch("/api/student", payload);
-      const updatedProfile = response?.data?.student || null;
-
-      setProfile(updatedProfile);
-      setFormValues(createFormFromProfile(updatedProfile));
-      setSuccessMessage("Profile updated successfully.");
+      await saveProfileAsync(payload);
     } catch (err) {
-      if (err?.response?.status === 401) {
+      if (isUnauthorizedError(err)) {
         handleUnauthorized();
         return;
       }
 
       setSaveError(extractAuthErrorMessage(err));
-    } finally {
-      setSaving(false);
     }
-  }, [formValues, handleUnauthorized]);
+  }, [formValues, handleUnauthorized, saveProfileAsync]);
 
   return {
     profile,

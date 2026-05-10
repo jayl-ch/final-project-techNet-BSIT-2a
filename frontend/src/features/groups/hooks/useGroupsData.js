@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import axios from "axios";
-import { clearAuthToken, extractAuthErrorMessage } from "../../auth/api/authApi";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  clearAuthToken,
+  extractAuthErrorMessage,
+  getAuthStudent,
+} from "../../auth/api/authApi";
 import {
   assignTaskToMember,
   unassignTaskFromMember,
   createGroup,
-  fetchAssignableTasks,
   fetchGroupDetails,
   fetchGroups,
   joinGroup,
@@ -14,7 +18,7 @@ import {
   removeGroup,
   updateAssignedTaskStatus,
 } from "../api/groupsApi";
-import { apiClient } from "../../auth/api/authApi";
+import { fetchTasks } from "../../tasks/api/tasksApi";
 
 const toGroupItem = (group) => ({
   id: group._id,
@@ -29,118 +33,241 @@ const toGroupItem = (group) => ({
         : 0,
 });
 
+const isUnauthorizedError = (error) =>
+  axios.isAxiosError(error) && error.response?.status === 401;
+
 export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
-  const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [groupDetails, setGroupDetails] = useState(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [detailsError, setDetailsError] = useState("");
-  const [assignableTasks, setAssignableTasks] = useState([]);
-  const [currentStudentId, setCurrentStudentId] = useState(null);
+  const queryClient = useQueryClient();
 
-  const loadGroups = useCallback(async () => {
-    setLoading(true);
-    setError("");
-
-    try {
-      const [groupsResult, studentResult] = await Promise.allSettled([
-        fetchGroups(),
-        apiClient.get("/api/student")
-      ]);
-
-      if (groupsResult.status === "rejected") throw groupsResult.reason;
-      setGroups(Array.isArray(groupsResult.value) ? groupsResult.value : []);
-
-      if (studentResult.status === "fulfilled") {
-        setCurrentStudentId(studentResult.value?.data?.student?._id || null);
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        clearAuthToken();
-        onUnauthorized?.();
-        return;
-      }
-
-      setError(extractAuthErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
+  const handleUnauthorized = useCallback(() => {
+    clearAuthToken();
+    onUnauthorized?.();
   }, [onUnauthorized]);
 
-  useEffect(() => {
-    loadGroups();
-  }, [loadGroups]);
+  const groupsQuery = useQuery({
+    queryKey: ["groups"],
+    queryFn: fetchGroups,
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
 
+  const studentQuery = useQuery({
+    queryKey: ["student"],
+    queryFn: async () => {
+      const response = await getAuthStudent();
+      return response?.data?.student ?? null;
+    },
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const groupDetailsQuery = useQuery({
+    queryKey: ["groupDetails", selectedGroupId],
+    queryFn: () => fetchGroupDetails(selectedGroupId),
+    enabled: Boolean(selectedGroupId),
+    staleTime: 15000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const assignableTasksQuery = useQuery({
+    queryKey: ["tasks"],
+    queryFn: fetchTasks,
+    enabled: Boolean(selectedGroupId),
+    staleTime: 30000,
+    retry: (failureCount, error) =>
+      !isUnauthorizedError(error) && failureCount < 1,
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const groups = Array.isArray(groupsQuery.data) ? groupsQuery.data : [];
   const groupItems = useMemo(() => groups.map(toGroupItem), [groups]);
+  const loading = groupsQuery.isLoading;
+  const error =
+    groupsQuery.error && !isUnauthorizedError(groupsQuery.error)
+      ? extractAuthErrorMessage(groupsQuery.error)
+      : "";
 
-  const loadGroupDetails = useCallback(async () => {
-    if (!selectedGroupId) {
-      setGroupDetails(null);
-      setAssignableTasks([]);
-      return;
-    }
+  const groupDetails = groupDetailsQuery.data ?? null;
+  const detailsLoading = groupDetailsQuery.isLoading;
+  const detailsError =
+    groupDetailsQuery.error && !isUnauthorizedError(groupDetailsQuery.error)
+      ? extractAuthErrorMessage(groupDetailsQuery.error)
+      : "";
+  const assignableTasks = Array.isArray(assignableTasksQuery.data)
+    ? assignableTasksQuery.data
+    : [];
+  const currentStudentId = studentQuery.data?._id || null;
 
-    setDetailsLoading(true);
-    setDetailsError("");
+  const { mutateAsync: createGroupAsync } = useMutation({
+    mutationFn: createGroup,
+    onSuccess: (created) => {
+      if (created?._id) {
+        queryClient.setQueryData(["groups"], (current) => {
+          const safeCurrent = Array.isArray(current) ? current : [];
+          return [created, ...safeCurrent];
+        });
+      } else {
+        queryClient.invalidateQueries({ queryKey: ["groups"] });
+      }
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
 
-    try {
-      const [detailsData, taskData] = await Promise.all([
-        fetchGroupDetails(selectedGroupId),
-        fetchAssignableTasks(),
-      ]);
+  const { mutateAsync: joinGroupAsync } = useMutation({
+    mutationFn: joinGroup,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
 
-      setGroupDetails(detailsData);
-      setAssignableTasks(Array.isArray(taskData) ? taskData : []);
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response?.status === 401) {
-        clearAuthToken();
-        onUnauthorized?.();
-        return;
+  const { mutateAsync: removeGroupAsync } = useMutation({
+    mutationFn: removeGroup,
+    onSuccess: (_, groupId) => {
+      queryClient.setQueryData(["groups"], (current) => {
+        const safeCurrent = Array.isArray(current) ? current : [];
+        return safeCurrent.filter((group) => group._id !== groupId);
+      });
+      queryClient.invalidateQueries({ queryKey: ["groupDetails", groupId] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: leaveGroupAsync } = useMutation({
+    mutationFn: leaveGroup,
+    onSuccess: (_, groupId) => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groupDetails", groupId] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: removeMemberAsync } = useMutation({
+    mutationFn: ({ groupId, memberId }) => removeGroupMember(groupId, memberId),
+    onSuccess: (_, { groupId }) => {
+      queryClient.invalidateQueries({ queryKey: ["groups"] });
+      queryClient.invalidateQueries({ queryKey: ["groupDetails", groupId] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: assignTaskAsync } = useMutation({
+    mutationFn: assignTaskToMember,
+    onSuccess: (_, { groupId }) => {
+      queryClient.invalidateQueries({ queryKey: ["groupDetails", groupId] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: unassignTaskAsync } = useMutation({
+    mutationFn: unassignTaskFromMember,
+    onSuccess: (_, { groupId }) => {
+      queryClient.invalidateQueries({ queryKey: ["groupDetails", groupId] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const { mutateAsync: updateStatusAsync } = useMutation({
+    mutationFn: ({ taskId, status }) => updateAssignedTaskStatus(taskId, status),
+    onSuccess: () => {
+      if (selectedGroupId) {
+        queryClient.invalidateQueries({
+          queryKey: ["groupDetails", selectedGroupId],
+        });
+      }
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        handleUnauthorized();
+      }
+    },
+  });
+
+  const addGroup = useCallback(
+    async (payload) => {
+      const created = await createGroupAsync(payload);
+      return created?._id || null;
+    },
+    [createGroupAsync],
+  );
+
+  const joinExistingGroup = useCallback(
+    async (payload) => {
+      await joinGroupAsync(payload);
+    },
+    [joinGroupAsync],
+  );
+
+  const deleteGroupById = useCallback(
+    async (groupId) => {
+      await removeGroupAsync(groupId);
+    },
+    [removeGroupAsync],
+  );
+
+  const leaveSelectedGroup = useCallback(
+    async (groupId) => {
+      const targetGroupId = groupId || selectedGroupId;
+
+      if (!targetGroupId) {
+        throw new Error("No group selected");
       }
 
-      setDetailsError(extractAuthErrorMessage(err));
-    } finally {
-      setDetailsLoading(false);
-    }
-  }, [onUnauthorized, selectedGroupId]);
-
-  useEffect(() => {
-    loadGroupDetails();
-  }, [loadGroupDetails]);
-
-  const addGroup = useCallback(async (payload) => {
-    const created = await createGroup(payload);
-
-    if (created?._id) {
-      setGroups((prev) => [created, ...prev]);
-      return created._id;
-    }
-
-    await loadGroups();
-    return null;
-  }, [loadGroups]);
-
-  const joinExistingGroup = useCallback(async (payload) => {
-    await joinGroup(payload);
-    await loadGroups();
-  }, [loadGroups]);
-
-  const deleteGroupById = useCallback(async (groupId) => {
-    await removeGroup(groupId);
-    setGroups((prev) => prev.filter((group) => group._id !== groupId));
-  }, []);
-
-  const leaveSelectedGroup = useCallback(async (groupId) => {
-    const targetGroupId = groupId || selectedGroupId;
-
-    if (!targetGroupId) {
-      throw new Error("No group selected");
-    }
-
-    await leaveGroup(targetGroupId);
-    await loadGroups();
-  }, [loadGroups, selectedGroupId]);
+      await leaveGroupAsync(targetGroupId);
+    },
+    [leaveGroupAsync, selectedGroupId],
+  );
 
   const removeMemberFromGroup = useCallback(
     async (memberId) => {
@@ -148,47 +275,52 @@ export const useGroupsData = (onUnauthorized, selectedGroupId = null) => {
         throw new Error("No group selected");
       }
 
-      await removeGroupMember(selectedGroupId, memberId);
-      await Promise.all([loadGroups(), loadGroupDetails()]);
+      await removeMemberAsync({ groupId: selectedGroupId, memberId });
     },
-    [loadGroupDetails, loadGroups, selectedGroupId],
+    [removeMemberAsync, selectedGroupId],
   );
 
-  const assignTask = useCallback(async ({ taskId, assignedTo }) => {
-    if (!selectedGroupId) {
-      throw new Error("No group selected");
-    }
+  const assignTask = useCallback(
+    async ({ taskId, assignedTo }) => {
+      if (!selectedGroupId) {
+        throw new Error("No group selected");
+      }
 
-    await assignTaskToMember({ taskId, assignedTo, groupId: selectedGroupId });
-    await loadGroupDetails();
-  }, [loadGroupDetails, selectedGroupId]);
+      await assignTaskAsync({ taskId, assignedTo, groupId: selectedGroupId });
+    },
+    [assignTaskAsync, selectedGroupId],
+  );
 
-  const unassignTask = useCallback(async (taskId) => {
-    if (!selectedGroupId) {
-      throw new Error("No group selected");
-    }
+  const unassignTask = useCallback(
+    async (taskId) => {
+      if (!selectedGroupId) {
+        throw new Error("No group selected");
+      }
 
-    await unassignTaskFromMember({ taskId, groupId: selectedGroupId });
-    await loadGroupDetails();
-  }, [loadGroupDetails, selectedGroupId]);
+      await unassignTaskAsync({ taskId, groupId: selectedGroupId });
+    },
+    [unassignTaskAsync, selectedGroupId],
+  );
 
-  const updateMemberTaskStatus = useCallback(async (taskId, status) => {
-    await updateAssignedTaskStatus(taskId, status);
-    await loadGroupDetails();
-  }, [loadGroupDetails]);
+  const updateMemberTaskStatus = useCallback(
+    async (taskId, status) => {
+      await updateStatusAsync({ taskId, status });
+    },
+    [updateStatusAsync],
+  );
 
   return {
     groups: groupItems,
     loading,
     error,
-    reload: loadGroups,
+    reload: groupsQuery.refetch,
     selectedGroupId,
     groupDetails,
     detailsLoading,
     detailsError,
     assignableTasks,
     currentStudentId,
-    reloadDetails: loadGroupDetails,
+    reloadDetails: groupDetailsQuery.refetch,
     addGroup,
     joinExistingGroup,
     deleteGroupById,
