@@ -225,6 +225,22 @@
   );
 }
 
+.tasks-kebab-toggle {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tasks-kebab-menu .dropdown-item i {
+  width: 1.1rem;
+}
+
+.dropup .kebab-menu::after {
+  display: none;
+}
+
 .tasks-focus-chip {
   display: inline-flex;
   align-items: center;

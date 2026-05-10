@@ -63,44 +63,75 @@ const TaskItem = ({
         <strong className="small">{progress}%</strong>
       </div>
 
-      <div className="d-lg-flex gap-2 justify-content-lg-end">
-        <Button
-          variant="outline-primary"
-          size="sm"
-          className="rounded-pill px-3"
-          onClick={onEdit}
-        >
-          <i className="bi bi-pencil-square me-1"></i>
-          Edit
-        </Button>
-        <Button
-          variant="outline-secondary"
-          size="sm"
-          className="rounded-pill px-3"
-          onClick={onCycleStatus}
-        >
-          <i className="bi bi-arrow-repeat me-1"></i>
-          Advance Status
-        </Button>
-        <Button
-          variant="outline-danger"
-          size="sm"
-          className="rounded-pill px-3"
-          onClick={onDelete}
-        >
-          <i className="bi bi-trash3 me-1"></i>
-          Delete
-        </Button>
-        <Button
-          variant="success"
-          size="sm"
-          className="rounded-pill px-3"
-          onClick={onComplete}
-          disabled={!canComplete}
-        >
-          <i className="bi bi-check2 me-1"></i>
-          Complete
-        </Button>
+      <div className="d-flex align-items-center justify-content-end">
+        <div className="d-none d-lg-flex gap-2 justify-content-lg-end flex-wrap">
+          <Button
+            variant="outline-primary"
+            size="sm"
+            className="rounded-pill px-3"
+            onClick={onEdit}
+          >
+            <i className="bi bi-pencil-square me-1"></i>
+            Edit
+          </Button>
+          <Button
+            variant="outline-secondary"
+            size="sm"
+            className="rounded-pill px-3"
+            onClick={onCycleStatus}
+          >
+            <i className="bi bi-arrow-repeat me-1"></i>
+            Advance Status
+          </Button>
+          <Button
+            variant="outline-danger"
+            size="sm"
+            className="rounded-pill px-3"
+            onClick={onDelete}
+          >
+            <i className="bi bi-trash3 me-1"></i>
+            Delete
+          </Button>
+          <Button
+            variant="success"
+            size="sm"
+            className="rounded-pill px-3"
+            onClick={onComplete}
+            disabled={!canComplete}
+          >
+            <i className="bi bi-check2 me-1"></i>
+            Complete
+          </Button>
+        </div>
+        <Dropdown className="d-lg-none" drop="up">
+          <Dropdown.Toggle
+            variant="outline-secondary"
+            size="sm"
+            className="kebab-menu rounded-pill px-2 tasks-kebab-toggle"
+            aria-label="Task actions"
+          >
+            <i className="bi bi-three-dots-vertical" aria-hidden="true" />
+          </Dropdown.Toggle>
+          <Dropdown.Menu align="end" className="tasks-kebab-menu">
+            <Dropdown.Item onClick={onEdit}>
+              <i className="bi bi-pencil-square me-2" aria-hidden="true" />
+              Edit
+            </Dropdown.Item>
+            <Dropdown.Item onClick={onCycleStatus}>
+              <i className="bi bi-arrow-repeat me-2" aria-hidden="true" />
+              Advance Status
+            </Dropdown.Item>
+            <Dropdown.Item onClick={onComplete} disabled={!canComplete}>
+              <i className="bi bi-check2 me-2" aria-hidden="true" />
+              Complete
+            </Dropdown.Item>
+            <Dropdown.Divider />
+            <Dropdown.Item onClick={onDelete} className="text-danger">
+              <i className="bi bi-trash3 me-2" aria-hidden="true" />
+              Delete
+            </Dropdown.Item>
+          </Dropdown.Menu>
+        </Dropdown>
       </div>
     </article>
   );
