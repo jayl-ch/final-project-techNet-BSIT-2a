@@ -5,6 +5,9 @@ import App from "./app/App";
 import { BrowserRouter } from "react-router";
 import { ThemeProvider } from "./app/providers/theme";
 import { QueryProvider } from "./app/providers/query";
+import { registerPwa } from "./pwa/registerPwa";
+
+registerPwa();
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
