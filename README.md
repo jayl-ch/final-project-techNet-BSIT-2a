@@ -27,6 +27,40 @@ This system helps students organize their academic tasks in one platform. It wou
 
 ---
 
+## Team Member Contributions
+
+### Mico Malana — Project Manager, Documentation Officer
+
+- Managed the overall project workflow and monitored team progress.
+- Organized project documentation, reports, and system screenshots.
+- Ensured that the documentation matches the implemented system features.
+
+### Christian Sannie Silo — Front-End Developer
+
+- Developed the frontend user interface using React and Bootstrap.
+- Integrated frontend functionalities with backend APIs.
+- Implemented task update, delete, filtering, and rendering functionalities.
+
+### Jay Lloyd Chicogo — Backend Developer, GitHub Manager
+
+- Assist in connecting frontend functionalities to backend APIs.
+- Managed backend routes and API flow for CRUD operations.
+- Maintained a clean GitHub workflow through pull request management and repository organization.
+
+### John Nelson Andes — Database Manager
+
+- Managed MongoDB collections and database structure.
+- Ensured that data is correctly stored, updated, and deleted in the database.
+- Verified that fetched data is properly rendered on the frontend.
+
+### Allen Benedict Asuncion — Tester & Debugger
+
+- Tested frontend interactions and system functionalities.
+- Verified that CRUD operations respond correctly.
+- Checked if rendered data and user interactions behave as expected.
+
+---
+
 ## Key Features
 
 - **Task Management (CRUD)** — Create, update, delete, and organize academic tasks..
