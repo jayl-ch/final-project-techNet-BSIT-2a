@@ -26,6 +26,13 @@ const findByGroupIdWithTaskAndStudent = async (groupId) => {
     .populate("assignedTo", "name email");
 };
 
+const findAllWithTaskAndGroup = async () => {
+  return await TaskAssignment.find({})
+    .populate("taskId", "name subject deadline difficulty status")
+    .populate("groupId", "name")
+    .lean();
+};
+
 const deleteByGroupId = async (groupId) => {
   return await TaskAssignment.deleteMany({ groupId });
 };
@@ -45,6 +52,7 @@ module.exports = {
   findByTaskAndGroup,
   createTaskAssignment,
   findByGroupIdWithTaskAndStudent,
+  findAllWithTaskAndGroup,
   deleteByGroupId,
   deleteByGroupAndStudent,
   deleteByTaskAndGroup,

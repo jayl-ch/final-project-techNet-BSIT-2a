@@ -36,6 +36,10 @@ const findByIdAndOwner = async (_id, owner) => {
   });
 };
 
+const findAll = async () => {
+  return await Group.find({}).lean();
+};
+
 module.exports = {
   create,
   findByCode,
@@ -44,4 +48,5 @@ module.exports = {
   findByGroupId,
   findByIdAndOwner,
   deleteById,
+  findAll,
 };
