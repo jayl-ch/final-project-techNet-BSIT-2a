@@ -2,34 +2,13 @@ import { Nav, Offcanvas } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import SidebarItem from "./SidebarItem";
 import TaskWiseIcon from "../../../shared/ui/icon/TaskWiseIcon";
-import { authLogoutStudent } from "../../auth/api/authApi";
-
-const navItems = [
-  {
-    name: "Dashboard",
-    path: "/dashboard",
-    icon: "house-door",
-  },
-  {
-    name: "Tasks",
-    path: "/tasks",
-    icon: "check2-square",
-  },
-  {
-    name: "Groups",
-    path: "/groups",
-    icon: "people",
-  },
-  {
-    name: "Profile",
-    path: "/profile",
-    icon: "person",
-  },
-];
+import { useSidebarData } from "../hooks/useSidebarData";
 
 const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
-  const handleLogout = async () => {
-    await authLogoutStudent();
+  const { navItems, handleLogout } = useSidebarData();
+
+  const handleLogoutClick = async () => {
+    await handleLogout();
     onClose();
   };
 
@@ -88,7 +67,7 @@ const Sidebar = ({ isOpen = false, onClose = () => {} }) => {
                 path="/login"
                 icon="box-arrow-right"
                 label="Logout"
-                onClick={handleLogout}
+                onClick={handleLogoutClick}
               />
             </div>
           </Nav>

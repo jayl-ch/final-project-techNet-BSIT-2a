@@ -18,6 +18,7 @@ const routers = [
   require("./modules/routes/student.router"),
   require("./modules/routes/group.router"),
   require("./modules/routes/task.router"),
+  require("./modules/routes/admin.router"),
 ];
 
 const allowedOrigins = (

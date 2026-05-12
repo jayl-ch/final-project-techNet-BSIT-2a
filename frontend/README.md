@@ -1,6 +1,6 @@
 # TaskWise Frontend
 
-TaskWise frontend is a React (Vite) single-page app for student task management, groups, and analytics.
+TaskWise frontend is a React (Vite) single-page app for student task management, groups, analytics, and a developer-only admin panel.
 
 ## Tech Stack
 
@@ -81,6 +81,10 @@ Protected:
 - `/groups/:groupId` Group details
 - `/profile` Profile
 
+Developer-only:
+
+- `/admin` Admin panel (requires developer role)
+
 ## Folder Structure
 
 ```text
@@ -89,15 +93,19 @@ Protected:
 ├── /src
 │   ├── /app
 │   │   ├── /providers
+│   │   │   ├── /query
+│   │   │   └── /theme
 │   │   └── /styles
 │   ├── /features
 │   │   ├── /auth
+│   │   ├── /admin
 │   │   ├── /dashboard
 │   │   ├── /groups
 │   │   ├── /landing
 │   │   ├── /layout
 │   │   ├── /profile
 │   │   └── /tasks
+│   ├── /pwa
 │   └── /shared
 │       └── /ui
 ├── index.html
@@ -109,6 +117,7 @@ Protected:
 
 - API calls are centralized in feature APIs (e.g., `features/groups/api`).
 - Auth uses httpOnly cookies; ensure backend and frontend origins are configured for credentials.
+- The admin panel is role-protected; only users with `role=developer` can access `/admin`.
 
 ## Maintainers
 

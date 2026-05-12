@@ -19,4 +19,8 @@ const updateById = async (_id, updates) => {
   });
 };
 
-module.exports = { findById, create, findByEmail, updateById };
+const findAll = async () => {
+  return await Student.find({}).select("name email role createdAt updatedAt").lean();
+};
+
+module.exports = { findById, create, findByEmail, updateById, findAll };

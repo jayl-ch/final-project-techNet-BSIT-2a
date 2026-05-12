@@ -7,5 +7,6 @@
 @import "../../features/tasks/styles/tasks.css";
 @import "../../features/groups/styles/groups.css";
 @import "../../features/profile/styles/profile.css";
+@import "../../features/admin/styles/admin.css";
 @import "./global.css";
 @import "./theme.css";

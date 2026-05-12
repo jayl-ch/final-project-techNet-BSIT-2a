@@ -19,6 +19,10 @@ const findByGroupIdWithStudent = async (groupId) => {
   return await GroupMember.find({ groupId }).populate("studentId", "name email");
 };
 
+const findAll = async () => {
+  return await GroupMember.find({}).lean();
+};
+
 const countMembersByGroupIds = async (groupIds) => {
   const counts = await GroupMember.aggregate([
     { $match: { groupId: { $in: groupIds } } },
@@ -44,6 +48,7 @@ module.exports = {
   findByGroupStudent,
   findByStudentId,
   findByGroupIdWithStudent,
+  findAll,
   countMembersByGroupIds,
   deleteByGroupStudent,
   deleteByGroupId,

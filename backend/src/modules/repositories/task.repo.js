@@ -31,6 +31,10 @@ const deleteById = async (taskId) => {
   return await Task.findByIdAndDelete(taskId);
 };
 
+const findAll = async () => {
+  return await Task.find({}).lean();
+};
+
 module.exports = {
   findByCreator,
   create,
@@ -38,4 +42,5 @@ module.exports = {
   findById,
   updateById,
   deleteById,
+  findAll,
 };
