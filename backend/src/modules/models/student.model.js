@@ -7,6 +7,11 @@ const studentSchema = new mongoose.Schema(
       maxlength: 50,
       required: true,
     },
+    role: {
+      type: String,
+      enum: ["user", "developer"],
+      default: "user",
+    },
     email: {
       type: String,
       maxlength: 255,
