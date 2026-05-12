@@ -70,6 +70,7 @@ const toPublicStudent = (student) => {
     _id: student._id,
     name: student.name,
     email: student.email,
+    role: student.role || "user",
     createdAt: student.createdAt,
     updatedAt: student.updatedAt,
   };
