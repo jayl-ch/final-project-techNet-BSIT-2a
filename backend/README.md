@@ -1,6 +1,6 @@
 # TaskWise Backend
 
-TaskWise backend is an Express + MongoDB API for assignment/task management, group collaboration, and priority/deadline analytics.
+TaskWise backend is an Express + MongoDB API for assignment/task management, group collaboration, priority/deadline analytics, and developer-only admin reporting.
 
 ## Tech Stack
 
@@ -11,6 +11,7 @@ TaskWise backend is an Express + MongoDB API for assignment/task management, gro
 - Session Transport: httpOnly secure cookies
 - Security Middleware: helmet, cors, cookie-parser
 - Password Hashing: bcrypt
+- Google Auth: Google ID token verification (google-auth-library)
 - Config: dotenv
 
 ## Current Architecture
@@ -50,7 +51,7 @@ Key middlewares currently implemented:
 
 ## Models
 
-- Student: user account and credentials
+- Student: user account and credentials, with role-based access (`user` or `developer`)
 - Group: collaboration group metadata
 - GroupMember: group membership and role (admin/member)
 - Task: assignment/task records
@@ -71,8 +72,10 @@ Flow summary:
 1. `POST /api/student/login` validates credentials and sets auth cookies.
 2. `POST /api/student/google` verifies Google ID token and sets auth cookies.
 3. Protected routes read access token from cookie (fallback to Bearer header).
-4. `POST /api/student/refresh` rotates refresh token and re-issues cookies.
+4. `POST /api/student/refresh` rotates refresh token and re-issues cookies (cookie or payload).
 5. `POST /api/student/logout` revokes refresh token and clears auth cookies.
+
+Refresh tokens are stored as hashes and revoked on rotation or logout.
 
 ## Environment Variables
 
@@ -144,6 +147,12 @@ npm start
 | POST | `/api/student/refresh` | Rotate refresh token and re-issue cookies |
 | POST | `/api/student/logout` | Revoke session and clear cookies |
 
+### Admin `/api/admin`
+
+| Method | Endpoint | Description |
+| --- | --- | --- |
+| GET | `/api/admin/users` | Developer-only user, group, and task summary |
+
 ### Group `/api/group`
 
 | Method | Endpoint | Description |
@@ -160,9 +169,9 @@ npm start
 
 | Method | Endpoint | Description |
 | --- | --- | --- |
-| GET | `/api/task` | Get authenticated user's tasks |
+| GET | `/api/task` | Get created + assigned tasks (includes priority level) |
 | POST | `/api/task/create` | Create task |
-| PATCH | `/api/task/update/:id` | Update task |
+| PATCH | `/api/task/update/:id` | Update task (assigned members can update status only) |
 | POST | `/api/task/assign` | Assign task to member (group admin only) |
 | DELETE | `/api/task/assign` | Remove task assignment (group admin only) |
 | POST | `/api/task/priority/:id` | Recompute and persist task priority |
@@ -173,6 +182,13 @@ npm start
 - A task can be assigned to only one member per group at a time.
 - If a task is already assigned, attempts to assign it to another member return a conflict error.
 - Group admins can unassign a task via `DELETE /api/task/assign` before reassigning.
+- Only the group owner can assign/unassign tasks, and only for tasks they created.
+- Assigned members can update only the task status.
+
+## Task Priority Engine
+
+- Priority is computed from deadline urgency and difficulty (LOW, MODERATE, CRITICAL).
+- Priorities are synced on `GET /api/task` and can be recomputed on demand via `POST /api/task/priority/:id`.
 
 ## Validation and Error Contract
 
@@ -203,6 +219,8 @@ npm start
 - Group admin can: delete group, remove members, assign tasks, unassign tasks.
 - Group member can: join group, view authorized group details, leave group.
 - Group admin cannot leave a group via leave endpoint; admin should delete group.
+- Developer role can access admin reporting endpoints.
+- Assigned members can update only the task status.
 
 ## Maintainers
 
