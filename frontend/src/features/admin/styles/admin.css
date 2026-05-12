@@ -1,0 +1,267 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
+:root {
+  --ad-surface: color-mix(in srgb, var(--bs-body-bg) 80%, #ffffff 20%);
+  --ad-surface-2: color-mix(in srgb, var(--bs-body-bg) 72%, #ffffff 28%);
+  --ad-border: color-mix(in srgb, var(--bs-border-color) 60%, transparent);
+  --ad-accent-blue: #2f6bff;
+  --ad-accent-teal: #0aa8a1;
+  --ad-accent-cyan: #0c9cc9;
+  --ad-accent-green: #20b26b;
+  --ad-accent-orange: #ff8b1f;
+}
+
+.admin-shell {
+  position: relative;
+  isolation: isolate;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.admin-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(47, 107, 255, 0.12), transparent 34%),
+    radial-gradient(circle at 84% 10%, rgba(10, 168, 161, 0.13), transparent 32%),
+    radial-gradient(circle at 82% 86%, rgba(32, 178, 107, 0.12), transparent 30%);
+}
+
+.admin-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.6rem 1.75rem;
+  border-radius: 1.5rem;
+  color: #f8fbff;
+  background:
+    linear-gradient(135deg, #1b4ce6, #0d6ba1 55%, #0f9a8b 100%),
+    repeating-linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.1) 0,
+      rgba(255, 255, 255, 0.1) 1px,
+      transparent 1px,
+      transparent 16px
+    );
+  background-blend-mode: soft-light;
+  box-shadow: 0 18px 38px rgba(8, 32, 57, 0.24);
+}
+
+.admin-date {
+  font-size: 0.8rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  opacity: 0.86;
+}
+
+.admin-title {
+  font-family: "Space Grotesk", "Manrope", sans-serif;
+  font-size: clamp(1.65rem, 2.5vw, 2.35rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.admin-subtitle {
+  max-width: 56ch;
+  opacity: 0.92;
+}
+
+.admin-stat-card,
+.admin-filter-card,
+.admin-list-card,
+.admin-detail-card {
+  background: color-mix(in srgb, var(--ad-surface) 92%, transparent);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 34px rgba(8, 22, 45, 0.12);
+}
+
+.admin-stat-card {
+  transition:
+    transform 0.24s ease,
+    box-shadow 0.24s ease;
+}
+
+.admin-stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 30px rgba(8, 22, 45, 0.16);
+}
+
+.admin-stat-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bs-secondary-color);
+  font-weight: 700;
+}
+
+.admin-stat-value {
+  font-size: clamp(1.45rem, 2.2vw, 1.95rem);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.admin-stat-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.6rem;
+  height: 2.6rem;
+  border-radius: 0.85rem;
+  font-size: 1.3rem;
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+
+.admin-filter-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--bs-secondary-color);
+  font-weight: 700;
+}
+
+.admin-filter-input {
+  border-color: var(--ad-border);
+  background: color-mix(in srgb, var(--ad-surface-2) 92%, transparent);
+}
+
+.admin-filter-input:focus {
+  border-color: color-mix(in srgb, var(--ad-accent-blue) 65%, transparent);
+  box-shadow: 0 0 0 0.24rem
+    color-mix(in srgb, var(--ad-accent-blue) 18%, transparent);
+}
+
+.admin-filter-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-weight: 600;
+  color: var(--bs-secondary-color);
+}
+
+.admin-list-card {
+  overflow: hidden;
+}
+
+.admin-list-header {
+  border-bottom: 1px solid var(--ad-border) !important;
+  background: transparent;
+}
+
+.admin-accordion .accordion-item {
+  border: 1px solid var(--ad-border);
+  border-radius: 1rem;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+  background: color-mix(in srgb, var(--bs-body-bg) 86%, #ffffff 14%);
+}
+
+.admin-accordion .accordion-item:last-child {
+  margin-bottom: 0;
+}
+
+.admin-accordion .accordion-button {
+  padding: 1.15rem 1.25rem;
+  background: transparent;
+  box-shadow: none;
+}
+
+.admin-accordion .accordion-button:focus {
+  box-shadow: none;
+}
+
+.admin-user-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.admin-user-name {
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.admin-user-email {
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+}
+
+.admin-user-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--bs-secondary-color);
+}
+
+.admin-user-counts {
+  display: flex;
+  gap: 0.75rem;
+  font-weight: 600;
+}
+
+.admin-user-date {
+  font-weight: 600;
+}
+
+.admin-detail-card {
+  border: 1px solid var(--ad-border);
+}
+
+.admin-detail-header {
+  border-bottom: 1px solid var(--ad-border) !important;
+  background: transparent;
+}
+
+.admin-section-title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 0.75rem;
+}
+
+.admin-list {
+  max-height: 260px;
+  overflow: auto;
+}
+
+.admin-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--ad-border);
+  background: transparent;
+}
+
+.admin-list-item:last-child {
+  border-bottom: none;
+}
+
+.admin-list-title {
+  font-weight: 600;
+}
+
+.admin-list-meta {
+  color: var(--bs-secondary-color);
+  font-size: 0.78rem;
+}
+
+.admin-empty-state {
+  padding: 1rem 1.25rem;
+  color: var(--bs-secondary-color);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 768px) {
+  .admin-hero {
+    border-radius: 1.1rem;
+    padding: 1.2rem;
+  }
+}
