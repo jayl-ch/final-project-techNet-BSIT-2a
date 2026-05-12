@@ -5,12 +5,14 @@ import {
   RegisterPage,
   ProtectedRoute,
   PublicRoute,
+  DeveloperRoute,
 } from "../features/auth";
 import { AppLayout } from "../features/layout";
 import { DashboardPage } from "../features/dashboard";
 import { TasksPage } from "../features/tasks";
 import { GroupsPage } from "../features/groups";
 import { ProfilePage } from "../features/profile";
+import { AdminPage } from "../features/admin";
 
 const AppRouter = () => {
   return (
@@ -27,6 +29,14 @@ const AppRouter = () => {
         <Route path="/groups" element={<GroupsPage />} />
         <Route path="/groups/:groupId" element={<GroupsPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route
+          path="/admin"
+          element={
+            <DeveloperRoute>
+              <AdminPage />
+            </DeveloperRoute>
+          }
+        />
       </Route>
       <Route
         path="/"
